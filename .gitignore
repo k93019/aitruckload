@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+*.pyc
+jobs.db
+accomplishment_inventory.md
+*.log
+.env
