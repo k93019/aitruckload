@@ -55,14 +55,24 @@ jobs:
       - name: Build installer
         shell: pwsh
         run: |
-          $possible = @(
+          $paths = @(
+            "$env:ChocolateyInstall\bin\ISCC.exe",
+            "C:\ProgramData\chocolatey\bin\ISCC.exe",
+            "$env:ProgramFiles(x86)\Inno Setup 6\ISCC.exe",
+            "$env:ProgramFiles\Inno Setup 6\ISCC.exe",
             "$env:ProgramFiles(x86)\Inno Setup*\ISCC.exe",
             "$env:ProgramFiles\Inno Setup*\ISCC.exe",
             "C:\ProgramData\chocolatey\lib\innosetup\tools\ISCC.exe"
           )
-          $iscc = $possible | ForEach-Object { Get-ChildItem $_ -ErrorAction SilentlyContinue } | Select-Object -First 1
+          $cmd = Get-Command ISCC.exe -ErrorAction SilentlyContinue
+          if ($cmd) {
+            $iscc = $cmd.Path
+          } else {
+            $iscc = $paths | ForEach-Object { Get-ChildItem $_ -ErrorAction SilentlyContinue } | Select-Object -First 1
+            if ($iscc -is [System.IO.FileInfo]) { $iscc = $iscc.FullName }
+          }
           if (-not $iscc) { throw "ISCC.exe not found" }
-          & $iscc.FullName "/DAppVersion=$env:APP_VERSION" "installer.iss"
+          & $iscc "/DAppVersion=$env:APP_VERSION" "installer.iss"
 
       - name: Upload installer artifact
         uses: actions/upload-artifact@v4
