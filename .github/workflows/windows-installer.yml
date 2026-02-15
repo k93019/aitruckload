@@ -1,0 +1,76 @@
+name: Windows Installer
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*"
+
+jobs:
+  build-installer:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install pyinstaller
+
+      - name: Set app version
+        shell: pwsh
+        run: |
+          $version = "1.0.1"
+          if ($env:GITHUB_REF -like "refs/tags/v*") {
+            $version = ($env:GITHUB_REF -replace "^refs/tags/v", "")
+          }
+          "APP_VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Build executable
+        shell: pwsh
+        run: |
+          pyinstaller --noconfirm --clean --onefile --name "Truck Load Finder" `
+            --icon "src\assets\icons\truck_loads_icon.ico" `
+            --add-data "src\templates;src\templates" `
+            --add-data "src\assets;src\assets" `
+            --add-data "data;data" `
+            "src\main.py"
+
+      - name: Install Inno Setup
+        shell: pwsh
+        run: |
+          choco install innosetup -y
+
+      - name: Build installer
+        shell: pwsh
+        run: |
+          $possible = @(
+            "$env:ProgramFiles(x86)\Inno Setup 6\ISCC.exe",
+            "$env:ProgramFiles\Inno Setup 6\ISCC.exe"
+          )
+          $iscc = $possible | Where-Object { Test-Path $_ } | Select-Object -First 1
+          if (-not $iscc) { throw "ISCC.exe not found" }
+          & $iscc "/DAppVersion=$env:APP_VERSION" "installer.iss"
+
+      - name: Upload installer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: TruckLoadFinderSetup-${{ env.APP_VERSION }}
+          path: dist_installer/TruckLoadFinderSetup-${{ env.APP_VERSION }}.exe
+
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist_installer/TruckLoadFinderSetup-${{ env.APP_VERSION }}.exe

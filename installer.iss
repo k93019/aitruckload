@@ -1,11 +1,16 @@
+#ifndef AppVersion
+  #define AppVersion "1.0.1"
+#endif
+
 [Setup]
 AppName=Truck load finder
-AppVersion=1.0.0
+AppVersion={#AppVersion}
 AppPublisher=Lighthouse Labs
+AppId={{9F3D6D8E-5C74-4F0A-9B70-7E2C3E3E6D9B}}
 DefaultDirName={pf}\Truck Load Finder
 DefaultGroupName=Truck Load Finder
 OutputDir=dist_installer
-OutputBaseFilename=TruckLoadFinderSetup
+OutputBaseFilename=TruckLoadFinderSetup-{#AppVersion}
 SetupIconFile=src\assets\icons\truck_loads_icon.ico
 UninstallDisplayIcon={app}\Truck Load Finder.exe
 WizardStyle=modern

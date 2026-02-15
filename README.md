@@ -10,6 +10,13 @@
 - Run server: `python -m uvicorn src.main:app --reload`
 - UI: `http://127.0.0.1:8000/`
 
+## Windows Installer (GitHub Actions)
+- Builds on each push to `main` and uploads the installer as a workflow artifact.
+- Releases are created on tags like `v1.0.2` with `TruckLoadFinderSetup-<version>.exe` attached.
+- To publish a release:
+  - `git tag v1.0.2`
+  - `git push origin v1.0.2`
+
 ## Key Files
 - `src/main.py`: FastAPI app, DB logic, scoring logic, endpoints.
 - `src/templates/index.html`: HTML UI.
