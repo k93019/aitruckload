@@ -56,12 +56,13 @@ jobs:
         shell: pwsh
         run: |
           $possible = @(
-            "$env:ProgramFiles(x86)\Inno Setup 6\ISCC.exe",
-            "$env:ProgramFiles\Inno Setup 6\ISCC.exe"
+            "$env:ProgramFiles(x86)\Inno Setup*\ISCC.exe",
+            "$env:ProgramFiles\Inno Setup*\ISCC.exe",
+            "C:\ProgramData\chocolatey\lib\innosetup\tools\ISCC.exe"
           )
-          $iscc = $possible | Where-Object { Test-Path $_ } | Select-Object -First 1
+          $iscc = $possible | ForEach-Object { Get-ChildItem $_ -ErrorAction SilentlyContinue } | Select-Object -First 1
           if (-not $iscc) { throw "ISCC.exe not found" }
-          & $iscc "/DAppVersion=$env:APP_VERSION" "installer.iss"
+          & $iscc.FullName "/DAppVersion=$env:APP_VERSION" "installer.iss"
 
       - name: Upload installer artifact
         uses: actions/upload-artifact@v4
