@@ -37,35 +37,68 @@ def index() -> str:
     body {
       margin: 0;
       font-family: "Source Sans 3", "IBM Plex Sans", "Segoe UI", sans-serif;
+      font-size: 17px;
       color: var(--ink);
       background: radial-gradient(circle at top left, #ffffff 0%, #f0efe9 45%, #eceae5 100%);
     }
     header {
-      padding: 28px 24px 12px;
-      max-width: 1200px;
+      padding: 28px 24px 16px;
+      width: 100%;
+      max-width: 100vw;
       margin: 0 auto;
+    }
+    .header-inner {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+    .header-main {
+      min-width: 240px;
+    }
+    .header-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+    .header-actions label {
+      font-size: 13px;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+    .header-actions .status {
+      margin-top: 0;
+      min-width: 240px;
+      text-align: right;
+    }
+    .header-actions .auto-refresh-status {
+      font-size: 13px;
+      color: var(--muted);
+      white-space: nowrap;
     }
     h1 {
       margin: 0 0 6px;
-      font-size: 32px;
+      font-size: 34px;
       letter-spacing: 0.2px;
     }
     p.subtitle {
       margin: 0;
       color: var(--muted);
-      font-size: 16px;
+      font-size: 17px;
     }
-    .grid {
-      display: grid;
-      gap: 16px;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      padding: 12px 24px 24px;
-      max-width: 1200px;
-      margin: 0 auto;
+    .filters {
+      padding: 0 24px 24px;
+      width: 100%;
+      max-width: 100vw;
+      margin: 0 auto 8px;
     }
     .results {
-      padding: 0 16px 24px;
-      max-width: min(1600px, 90vw);
+      padding: 0 24px 24px;
+      width: 100%;
+      max-width: 100vw;
       margin: 0 auto 24px;
     }
     section {
@@ -77,17 +110,17 @@ def index() -> str:
     }
     section h2 {
       margin: 0 0 10px;
-      font-size: 20px;
+      font-size: 22px;
     }
     .controls {
       display: grid;
       gap: 12px;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      grid-template-columns: repeat(3, minmax(180px, 1fr));
     }
     label {
       display: grid;
       gap: 6px;
-      font-size: 13px;
+      font-size: 14px;
       color: var(--muted);
       text-transform: uppercase;
       letter-spacing: 0.6px;
@@ -96,7 +129,7 @@ def index() -> str:
       border: 1px solid var(--border);
       border-radius: 8px;
       padding: 12px 12px;
-      font-size: 16px;
+      font-size: 17px;
       background: #fff;
       color: var(--ink);
     }
@@ -106,16 +139,52 @@ def index() -> str:
       flex-wrap: wrap;
       margin-top: 12px;
     }
+    .hint {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    details.advanced {
+      margin-top: 12px;
+      padding-top: 8px;
+      border-top: 1px dashed var(--border);
+    }
+    details.advanced summary {
+      cursor: pointer;
+      font-weight: 600;
+      color: #2b2b2f;
+    }
+    .advanced-controls {
+      margin-top: 10px;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
     button {
       border: none;
       border-radius: 10px;
       padding: 14px 18px;
       font-weight: 700;
-      font-size: 16px;
+      font-size: 17px;
       cursor: pointer;
       background: var(--accent);
       color: var(--accent-ink);
       transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+    body.auto-refresh-active button {
+      opacity: 0.35;
+    }
+    body[aria-busy="true"] input,
+    body[aria-busy="true"] select,
+    body[aria-busy="true"] textarea {
+      opacity: 0.6;
+    }
+    #btn-scrape {
+      min-width: 210px;
     }
     button.secondary {
       background: #e9eef8;
@@ -127,7 +196,7 @@ def index() -> str:
     }
     .status {
       margin-top: 10px;
-      font-size: 14px;
+      font-size: 15px;
       color: var(--muted);
       min-height: 18px;
     }
@@ -136,19 +205,20 @@ def index() -> str:
     }
     table {
       width: 100%;
+      min-width: 1200px;
       border-collapse: collapse;
-      font-size: 14px;
-      line-height: 1.4;
+      font-size: 15px;
+      line-height: 1.5;
     }
     th, td {
       border-bottom: 1px solid var(--border);
-      padding: 10px 12px;
+      padding: 12px 14px;
       text-align: left;
       white-space: nowrap;
     }
     th {
       background: #f3f4f6;
-      font-size: 13px;
+      font-size: 14px;
       color: #2b2b2f;
       position: sticky;
       top: 0;
@@ -162,65 +232,99 @@ def index() -> str:
       border-radius: 999px;
       background: #eff3ff;
       color: #2a4aa8;
-      font-size: 12px;
+      font-size: 13px;
     }
     @media (max-width: 720px) {
       header { padding: 20px 16px 8px; }
-      .grid { padding: 8px 16px 16px; }
+      .filters { padding: 0 16px 16px; }
+      .results { padding: 0 16px 20px; }
+    }
+    @media (max-width: 980px) {
+      .header-actions { justify-content: flex-start; }
+      .header-actions .status { text-align: left; min-width: 0; }
+      .controls { grid-template-columns: repeat(2, minmax(160px, 1fr)); }
+    }
+    @media (max-width: 640px) {
+      .controls { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
   <header>
-    <h1>Load Finder</h1>
-    <p class=\"subtitle\">Retrieve sample data, apply filters, and review results with match scores.</p>
+    <div class=\"header-inner\">
+      <div class=\"header-main\">
+        <h1>Truck load finder</h1>
+        <p class=\"subtitle\">Retrieves data from the web, applies filters, and shows results.</p>
+      </div>
+      <div class=\"header-actions\">
+        <label>Overwrite existing data
+          <select id=\"overwrite\">
+            <option value=\"false\" selected>False</option>
+            <option value=\"true\">True</option>
+          </select>
+        </label>
+        <label>Auto-refresh
+          <select id=\"auto_refresh\">
+            <option value=\"0\" selected>Off</option>
+            <option value=\"20\">20 s</option>
+            <option value=\"60\">1 min</option>
+            <option value=\"600\">10 min</option>
+          </select>
+        </label>
+        <button id=\"btn-scrape\">Retrieve data</button>
+        <div class=\"auto-refresh-status\" id=\"auto-refresh-status\"></div>
+        <div class=\"status\" id=\"status-scrape\"></div>
+      </div>
+    </div>
   </header>
 
-  <div class=\"grid\">
-    <section>
-      <h2>Retrieve data</h2>
-      <p class=\"subtitle\">Load sample data into the database.</p>
-      <div class=\"actions\">
-        <button id=\"btn-scrape\">Retrieve data</button>
-      </div>
-      <div class=\"status\" id=\"status-scrape\"></div>
-    </section>
-
+  <div class=\"filters\">
     <section>
       <h2>Process data with filters</h2>
       <div class=\"controls\">
-        <label>Tag<input id=\"tag\" value=\"DEFAULT\" /></label>
-        <label>Date<input id=\"date\" value=\"TODAY\" /></label>
-        <label>O-City<input id=\"o_city\" value=\"Houston\" /></label>
-        <label>O-St<input id=\"o_st\" value=\"TX\" /></label>
-        <label>D-City<input id=\"d_city\" value=\"San Antonio\" /></label>
-        <label>D-St<input id=\"d_st\" value=\"TX\" /></label>
-        <label>O-DH max<input id=\"o_dh\" type=\"number\" min=\"0\" step=\"1\" value=\"75\" /></label>
-        <label>D-DH max<input id=\"d_dh\" type=\"number\" min=\"0\" step=\"1\" value=\"100\" /></label>
+        <label>Tag<input id=\"tag\" value=\"\" /></label>
+        <label>Date<input id=\"date\" value=\"\" /></label>
         <label>Limit<input id=\"limit\" type=\"number\" min=\"1\" step=\"1\" value=\"50\" /></label>
-        <label>Only unscored
-          <select id=\"only_unscored\">
-            <option value=\"true\" selected>True</option>
-            <option value=\"false\">False</option>
-          </select>
-        </label>
-        <label>Replace tag
-          <select id=\"replace\">
+        <label>O-City<input id=\"o_city\" value=\"\" /></label>
+        <label>O-St<input id=\"o_st\" value=\"\" /></label>
+        <label>O-DH max<input id=\"o_dh\" type=\"number\" min=\"0\" step=\"1\" /></label>
+        <label>D-City<input id=\"d_city\" value=\"\" /></label>
+        <label>D-St<input id=\"d_st\" value=\"\" /></label>
+        <label>D-DH max<input id=\"d_dh\" type=\"number\" min=\"0\" step=\"1\" /></label>
+        <label>Show unscored
+          <select id=\"show_unscored\">
             <option value=\"true\" selected>True</option>
             <option value=\"false\">False</option>
           </select>
         </label>
         <label>Min match score
-          <input id=\"min_score\" type=\"number\" min=\"0\" step=\"0.1\" value=\"5\" />
+          <input id=\"min_score\" type=\"number\" min=\"0\" step=\"0.1\" value=\"0\" />
         </label>
       </div>
+      <details class=\"advanced\">
+        <summary>Advanced</summary>
+        <div class=\"controls advanced-controls\">
+          <label>Tag only unscored
+            <select id=\"only_unscored\">
+              <option value=\"true\">True</option>
+              <option value=\"false\" selected>False</option>
+            </select>
+          </label>
+          <label>Clear tag first
+            <select id=\"replace\">
+              <option value=\"true\" selected>True</option>
+              <option value=\"false\">False</option>
+            </select>
+          </label>
+        </div>
+      </details>
       <div class=\"actions\">
-        <button id=\"btn-shortlist\" class=\"secondary\">Run filters</button>
-        <button id=\"btn-query\">Load results</button>
+        <button id=\"btn-shortlist\" class=\"secondary\">Set filters</button>
       </div>
+      <p class=\"hint\">Set filters: Applies the above filters.</p>
+      <p class=\"hint\" id=\"status-working\"></p>
       <div class=\"status\" id=\"status-shortlist\"></div>
     </section>
-
   </div>
 
   <div class=\"results\">
@@ -255,16 +359,33 @@ def index() -> str:
     const statusScrape = document.getElementById("status-scrape");
     const statusShortlist = document.getElementById("status-shortlist");
     const statusResults = document.getElementById("status-results");
+    const statusWorking = document.getElementById("status-working");
     const tableBody = document.querySelector("#results-table tbody");
+    const autoRefreshStatus = document.getElementById("auto-refresh-status");
+    const scrapeButton = document.getElementById("btn-scrape");
+    const scrapeButtonLabel = scrapeButton.textContent;
+    let refreshTimer = null;
+    let countdownTimer = null;
+    let nextRefreshAt = null;
+    let hasRunFilters = false;
+    let isRunning = false;
 
     function clampNonNegative(value, fallback) {
       if (!Number.isFinite(value)) return fallback;
       return Math.max(0, value);
     }
 
+    function optionalInt(value) {
+      const text = String(value ?? "").trim();
+      if (!text) return null;
+      const parsed = parseInt(text, 10);
+      if (!Number.isFinite(parsed)) return null;
+      return Math.max(0, parsed);
+    }
+
     function payloadFromForm() {
-      const oDh = clampNonNegative(parseInt(document.getElementById("o_dh").value, 10), 0);
-      const dDh = clampNonNegative(parseInt(document.getElementById("d_dh").value, 10), 0);
+      const oDh = optionalInt(document.getElementById("o_dh").value);
+      const dDh = optionalInt(document.getElementById("d_dh").value);
       const limit = clampNonNegative(parseInt(document.getElementById("limit").value, 10), 1) || 1;
       return {
         tag: document.getElementById("tag").value,
@@ -300,6 +421,105 @@ def index() -> str:
       return res.json();
     }
 
+    function refreshIntervalSeconds() {
+      const raw = document.getElementById("auto_refresh").value;
+      const parsed = parseInt(raw, 10);
+      return Number.isFinite(parsed) ? parsed : 0;
+    }
+
+    function updateAutoRefreshStatus({ running } = { running: false }) {
+      const seconds = refreshIntervalSeconds();
+      if (seconds <= 0) {
+        autoRefreshStatus.textContent = "";
+        return;
+      }
+      autoRefreshStatus.textContent = "";
+    }
+
+    function formatCountdown(seconds) {
+      const safeSeconds = Math.max(0, Math.floor(seconds));
+      const minutes = Math.floor(safeSeconds / 60);
+      const remaining = safeSeconds % 60;
+      return `${String(minutes).padStart(2, "0")}:${String(remaining).padStart(2, "0")}`;
+    }
+
+    function updateCountdownLabel() {
+      if (!nextRefreshAt) {
+        return;
+      }
+      const remainingSeconds = Math.max(0, Math.ceil((nextRefreshAt - Date.now()) / 1000));
+      scrapeButton.textContent = `Next refresh in ${formatCountdown(remainingSeconds)}`;
+    }
+
+    function clearCountdown() {
+      if (countdownTimer) {
+        clearInterval(countdownTimer);
+        countdownTimer = null;
+      }
+      nextRefreshAt = null;
+    }
+
+    function updateAutoRefreshControls() {
+      const seconds = refreshIntervalSeconds();
+      if (scrapeButton) {
+        scrapeButton.disabled = seconds > 0;
+      }
+      if (seconds <= 0) {
+        clearCountdown();
+        scrapeButton.textContent = scrapeButtonLabel;
+        return;
+      }
+      if (!hasRunFilters) {
+        scrapeButton.textContent = "Auto refresh pending";
+        return;
+      }
+      updateCountdownLabel();
+    }
+
+    function setAutoRefresh() {
+      if (refreshTimer) {
+        clearInterval(refreshTimer);
+        refreshTimer = null;
+      }
+      const seconds = refreshIntervalSeconds();
+      if (seconds > 0 && hasRunFilters) {
+        nextRefreshAt = Date.now() + seconds * 1000;
+        updateCountdownLabel();
+        if (!countdownTimer) {
+          countdownTimer = setInterval(updateCountdownLabel, 1000);
+        }
+        refreshTimer = setInterval(() => {
+          runFiltersAndLoad({ runScrape: true });
+        }, seconds * 1000);
+      } else {
+        clearCountdown();
+      }
+      updateAutoRefreshStatus({ running: false });
+      updateAutoRefreshControls();
+    }
+
+    function setBusyState(isBusy) {
+      const controls = document.querySelectorAll("button, input, select, textarea");
+      controls.forEach(control => {
+        control.disabled = isBusy;
+      });
+      document.body.setAttribute("aria-busy", isBusy ? "true" : "false");
+      if (statusWorking) {
+        statusWorking.textContent = isBusy ? "Working..." : "";
+      }
+      if (!isBusy) {
+        updateAutoRefreshControls();
+      }
+    }
+
+    async function runScrape() {
+      statusScrape.textContent = "Running scrape...";
+      const overwrite = document.getElementById("overwrite").value === "true";
+      const result = await postJson("/scrape", { overwrite });
+      statusScrape.textContent = `Retrieved ${result.total_returned}. Inserted ${result.inserted}, updated ${result.updated}. Total in DB: ${result.total_in_db}.`;
+      return result;
+    }
+
     function renderTable(rows) {
       tableBody.innerHTML = "";
       rows.forEach(row => {
@@ -323,43 +543,93 @@ def index() -> str:
       });
     }
 
-    document.getElementById("btn-scrape").addEventListener("click", async () => {
-      statusScrape.textContent = "Running scrape...";
+    async function runFiltersAndLoad({ runScrape: shouldScrape = false } = {}) {
+      if (isRunning) return;
+      isRunning = true;
+      if (shouldScrape) {
+        document.body.classList.add("auto-refresh-active");
+        clearCountdown();
+        scrapeButton.textContent = "Refreshing...";
+      }
+      setBusyState(true);
+      updateAutoRefreshStatus({ running: true });
+      statusShortlist.textContent = shouldScrape
+        ? "Refreshing data, tagging, and scoring..."
+        : "Tagging and scoring...";
       try {
-        const result = await postJson("/scrape", {});
-        statusScrape.textContent = `Scrape complete. Inserted ${result.inserted}, updated ${result.updated}.`;
+        if (shouldScrape) {
+          await runScrape();
+        }
+        const payload = payloadFromForm();
+        const shortlistResult = await postJson("/shortlist", payload);
+        const tag = shortlistResult.tag;
+        const scoreResult = await postJson("/loads/score", {
+          tag,
+          only_unscored: payload.only_unscored,
+          limit: payload.limit
+        });
+        const queryPayload = {
+          ...payload,
+          tag,
+          only_unscored: false
+        };
+        const result = await postJson("/loads/query", queryPayload);
+        const threshold = minScore();
+        const showUnscored = document.getElementById("show_unscored").value === "true";
+        let hiddenUnscored = 0;
+        const sorted = (result.results || []).slice().sort((a, b) => {
+          const aScore = a.match_score;
+          const bScore = b.match_score;
+          if (aScore == null && bScore == null) return 0;
+          if (aScore == null) return 1;
+          if (bScore == null) return -1;
+          return bScore - aScore;
+        });
+        const rows = sorted.filter(r => {
+          if (r.match_score == null) {
+            if (!showUnscored) hiddenUnscored += 1;
+            return showUnscored;
+          }
+          return r.match_score >= threshold;
+        });
+        renderTable(rows);
+        statusShortlist.textContent = `Tagged ${shortlistResult.marked}. Total tagged: ${shortlistResult.total}. Scored ${scoreResult.scored}.`;
+        const hiddenText = !showUnscored && hiddenUnscored
+          ? ` ${hiddenUnscored} hidden (unscored).`
+          : "";
+        statusResults.textContent = `Showing ${rows.length} of ${result.count} results (min match score ${threshold}).${hiddenText}`;
+        hasRunFilters = true;
+        setAutoRefresh();
+        updateAutoRefreshControls();
+      } catch (err) {
+        statusShortlist.textContent = `Run filters failed: ${err.message}`;
+      } finally {
+        isRunning = false;
+        setBusyState(false);
+        updateAutoRefreshStatus({ running: false });
+        if (shouldScrape) {
+          document.body.classList.remove("auto-refresh-active");
+        }
+      }
+    }
+
+    document.getElementById("btn-scrape").addEventListener("click", async () => {
+      try {
+        await runScrape();
       } catch (err) {
         statusScrape.textContent = `Scrape failed: ${err.message}`;
       }
     });
 
     document.getElementById("btn-shortlist").addEventListener("click", async () => {
-      statusShortlist.textContent = "Applying filters...";
-      try {
-        const payload = payloadFromForm();
-        const result = await postJson("/shortlist", payload);
-        statusShortlist.textContent = `Shortlisted ${result.marked}. Total tagged: ${result.total}.`;
-      } catch (err) {
-        statusShortlist.textContent = `Shortlist failed: ${err.message}`;
-      }
+      await runFiltersAndLoad({ runScrape: false });
     });
 
-    document.getElementById("btn-query").addEventListener("click", async () => {
-      statusResults.textContent = "Loading results...";
-      try {
-        const payload = payloadFromForm();
-        const result = await postJson("/loads/query", payload);
-        const threshold = minScore();
-        const rows = (result.results || []).filter(r => {
-          if (r.match_score == null) return false;
-          return r.match_score >= threshold;
-        });
-        renderTable(rows);
-        statusResults.textContent = `Showing ${rows.length} of ${result.count} results (min match score ${threshold}).`;
-      } catch (err) {
-        statusResults.textContent = `Load failed: ${err.message}`;
-      }
+    document.getElementById("auto_refresh").addEventListener("change", () => {
+      setAutoRefresh();
     });
+
+    updateAutoRefreshControls();
   </script>
 </body>
 </html>
@@ -370,6 +640,14 @@ def index() -> str:
 # -----------------------------
 DB_PATH = os.getenv("LOADS_DB_PATH", "loads.db")
 SAMPLE_LOADS_PATH = os.getenv("SAMPLE_LOADS_PATH", "sample_loads.json")
+
+RATE_MIN = 0.0
+RATE_MAX = 3000.0
+D2P_MIN = 0.0
+D2P_MAX = 40.0
+RATE_WEIGHT = 0.7
+D2P_WEIGHT = 0.3
+D2P_MISSING_PENALTY = 2.0
 
 # -----------------------------
 # STATE MACHINE (simple)
@@ -384,6 +662,7 @@ STATE_IGNORED = "IGNORED"
 class ScrapeRequest(BaseModel):
     db_path: Optional[str] = None
     sample_path: Optional[str] = None
+    overwrite: Optional[bool] = None
 
 
 class ShortlistRequest(BaseModel):
@@ -423,10 +702,11 @@ class LoadsQueryRequest(BaseModel):
         allow_population_by_field_name = True
 
 
-class MatchScoreRequest(BaseModel):
+class ScoreLoadsRequest(BaseModel):
     db_path: Optional[str] = None
-    load_key: str
-    match_score: float
+    tag: Optional[str] = None
+    only_unscored: Optional[bool] = None
+    limit: Optional[int] = None
 
 
 class PipelineRequest(BaseModel):
@@ -499,6 +779,56 @@ def to_int(value: Any) -> Optional[int]:
         return int(text)
     except ValueError:
         return None
+
+
+def clamp(value: float, low: float, high: float) -> float:
+    return max(low, min(high, value))
+
+
+def parse_rate(value: Any) -> Optional[float]:
+    if value is None:
+        return None
+    text = str(value).strip().replace("$", "").replace(",", "")
+    if not text:
+        return None
+    try:
+        return float(text)
+    except ValueError:
+        return None
+
+
+def parse_d2p(value: Any) -> Optional[float]:
+    if value is None:
+        return None
+    text = str(value).strip()
+    if not text:
+        return None
+    try:
+        return float(text)
+    except ValueError:
+        return None
+
+
+def math_match_score(load: Dict[str, Any]) -> float:
+    rate = parse_rate(load.get("Rate"))
+    d2p = parse_d2p(load.get("D2P"))
+
+    rate_norm = 0.0
+    if rate is not None:
+        rate_norm = clamp((rate - RATE_MIN) / (RATE_MAX - RATE_MIN), 0.0, 1.0)
+
+    if d2p is None:
+        d2p_norm = 0.0
+        missing_d2p = True
+    else:
+        d2p_norm = clamp(1.0 - ((d2p - D2P_MIN) / (D2P_MAX - D2P_MIN)), 0.0, 1.0)
+        missing_d2p = False
+
+    blended = (RATE_WEIGHT * rate_norm) + (D2P_WEIGHT * d2p_norm)
+    score = blended * 10.0
+    if missing_d2p:
+        score -= D2P_MISSING_PENALTY
+    return round(clamp(score, 0.0, 10.0), 1)
 
 
 def init_db(con: sqlite3.Connection) -> None:
@@ -692,9 +1022,11 @@ def run_scrape(
     *,
     db_path: str = DB_PATH,
     sample_path: str = SAMPLE_LOADS_PATH,
+    overwrite: bool = False,
 ) -> Dict[str, Any]:
     con = sqlite3.connect(db_path)
     init_db(con)
+    ensure_columns(con)
 
     run_started = utc_now()
     inserted = 0
@@ -708,6 +1040,9 @@ def run_scrape(
         loads = json.load(handle)
 
     now = utc_now()
+    if overwrite:
+        con.execute("DELETE FROM loads")
+        con.commit()
     for load in loads:
         outcome = upsert_load(con, load, now=now)
         if outcome == "inserted":
@@ -730,6 +1065,7 @@ def run_scrape(
         len(loads),
     ))
     con.commit()
+    total_in_db = con.execute("SELECT COUNT(*) FROM loads").fetchone()[0]
     con.close()
 
     return {
@@ -738,6 +1074,7 @@ def run_scrape(
         "total_returned": len(loads),
         "inserted": inserted,
         "updated": updated,
+        "total_in_db": total_in_db,
         "db_path": db_path,
         "sample_path": sample_path,
     }
@@ -938,6 +1275,8 @@ def query_loads(
     FROM loads
     WHERE {where_sql}
     ORDER BY
+        CASE WHEN match_score IS NULL THEN 1 ELSE 0 END,
+        match_score DESC,
         CASE state WHEN 'READY' THEN 0 WHEN 'NEW' THEN 1 ELSE 2 END,
         first_seen_at DESC
     LIMIT ? OFFSET ?
@@ -949,31 +1288,58 @@ def query_loads(
     return [dict(row) for row in rows]
 
 
-def update_match_score(
+def score_tagged_loads(
     *,
     db_path: str,
-    load_key: str,
-    match_score: float,
+    tag: str,
+    only_unscored: bool = False,
+    limit: int = 200,
 ) -> Dict[str, Any]:
+    if not tag:
+        raise ValueError("Tag is required")
+
     con = sqlite3.connect(db_path)
+    con.row_factory = sqlite3.Row
     ensure_columns(con)
     cur = con.cursor()
-    cur.execute("SELECT load_key FROM loads WHERE load_key=?", (load_key,))
-    if cur.fetchone() is None:
-        con.close()
-        raise ValueError("Load not found")
 
-    cur.execute(
-        "UPDATE loads SET match_score=? WHERE load_key=?",
-        (match_score, load_key),
-    )
+    where = ["shortlist_tag = ?"]
+    params: List[Any] = [tag]
+
+    if only_unscored:
+        where.append("match_score IS NULL")
+
+    where_sql = " AND ".join(where)
+    sql = f"""
+    SELECT load_key, "Rate", "D2P"
+    FROM loads
+    WHERE {where_sql}
+    ORDER BY
+        CASE state WHEN 'READY' THEN 0 WHEN 'NEW' THEN 1 ELSE 2 END,
+        first_seen_at DESC
+    LIMIT ?
+    """
+    rows = cur.execute(sql, params + [limit]).fetchall()
+
+    updates = []
+    for row in rows:
+        score = math_match_score(dict(row))
+        updates.append((score, row["load_key"]))
+
+    if updates:
+        cur.executemany(
+            "UPDATE loads SET match_score=? WHERE load_key=?",
+            updates,
+        )
     con.commit()
     con.close()
 
     return {
-        "load_key": load_key,
-        "match_score": match_score,
+        "tag": tag,
+        "scored": len(updates),
     }
+
+
 
 
 @app.get("/health")
@@ -987,6 +1353,7 @@ def scrape_endpoint(req: ScrapeRequest) -> dict:
         result = run_scrape(
             db_path=req.db_path if req.db_path is not None else DB_PATH,
             sample_path=req.sample_path if req.sample_path is not None else SAMPLE_LOADS_PATH,
+            overwrite=req.overwrite if req.overwrite is not None else False,
         )
     except (ValueError, FileNotFoundError, json.JSONDecodeError) as exc:
         raise HTTPException(status_code=400, detail=str(exc))
@@ -1032,17 +1399,20 @@ def loads_query_endpoint(req: LoadsQueryRequest) -> dict:
     return {"results": result, "count": len(result)}
 
 
-@app.post("/loads/match-score")
-def loads_match_score_endpoint(req: MatchScoreRequest) -> dict:
+@app.post("/loads/score")
+def loads_score_endpoint(req: ScoreLoadsRequest) -> dict:
     try:
-        result = update_match_score(
+        result = score_tagged_loads(
             db_path=req.db_path if req.db_path is not None else DB_PATH,
-            load_key=req.load_key,
-            match_score=req.match_score,
+            tag=req.tag.strip() if req.tag is not None else "",
+            only_unscored=req.only_unscored if req.only_unscored is not None else False,
+            limit=req.limit if req.limit is not None else 200,
         )
     except ValueError as exc:
-        raise HTTPException(status_code=404, detail=str(exc))
+        raise HTTPException(status_code=400, detail=str(exc))
     return result
+
+
 
 
 @app.post("/pipeline")
