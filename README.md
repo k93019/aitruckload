@@ -18,6 +18,8 @@
 ## Environment Defaults
 - `LOADS_DB_PATH` (default `loads.db`)
 - `SAMPLE_LOADS_PATH` (default `sample_loads.json`)
+- `TIMING_LOGS=1` enables JSONL timing logs (server + client).
+- `TIMING_LOG_PATH` sets log path (default `timing.log`).
 
 ## Core Flow
 1) `/scrape` loads sample JSON into SQLite (insert/update).
@@ -28,6 +30,7 @@
 ## Endpoints
 - `GET /`: HTML UI (single page inside `load_api.py`).
 - `GET /health`: `{ "status": "ok" }`.
+- `GET /favicon.ico`: serves `Resources/truck_loads_icon.ico`.
 - `POST /scrape`: `{ overwrite?: bool, db_path?: str, sample_path?: str }`.
   - If `overwrite` is true, deletes all rows from `loads` before inserting.
   - If false, upserts by `load_key` (updates existing rows).
@@ -58,6 +61,13 @@
 - “Retrieve data” calls `/scrape`.
 - “Set filters” triggers shortlist + score + query.
 - Auto-refresh triggers the same pipeline on a timer; countdown indicates activity.
+- Auto-refresh uses seconds internally (20 s, 1 min, 10 min).
+- Filters are collapsed by default.
+- Date is a dropdown (Current date / Next date) driven by `timeapi.io` for America/Chicago.
+- O-St and D-St are US state dropdowns.
+- Results columns are ordered: Match, Rate, Company, then location fields.
+- A CT clock is shown top-right with a warning if time sync fails.
+- UI scores all tagged loads (no show-unscored toggle).
 
 ## Notes for LLMs
 - All logic lives in `load_api.py`; there is no separate frontend build.
