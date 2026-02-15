@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Load Finder</title>
+  <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+  <link rel="apple-touch-icon" href="/favicon.ico" />
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f3f1ec;
+      --card: #ffffff;
+      --ink: #1a1a1a;
+      --muted: #6b6b6f;
+      --accent: #0b5ed7;
+      --accent-ink: #ffffff;
+      --border: #d9d9de;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Source Sans 3", "IBM Plex Sans", "Segoe UI", sans-serif;
+      font-size: 18px;
+      line-height: 1.6;
+      color: var(--ink);
+      background: radial-gradient(circle at top left, #ffffff 0%, #f2f0ea 45%, #ebe7e1 100%);
+    }
+    header {
+      padding: 28px 24px 16px;
+      width: 100%;
+      max-width: 100vw;
+      margin: 0 auto;
+    }
+    .header-inner {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+    .header-main {
+      min-width: 240px;
+    }
+    .header-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      flex: 1;
+    }
+    .header-controls {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+    .header-brand {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .time-stack {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 2px;
+    }
+    .time-display {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .time-warning {
+      font-size: 12px;
+      color: #9b4a2f;
+      white-space: nowrap;
+    }
+    .header-actions label {
+      font-size: 13px;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+    .header-actions .status {
+      margin-top: 0;
+      text-align: right;
+    }
+    .header-actions .auto-refresh-status {
+      font-size: 13px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .brand-icon {
+      width: 90px;
+      height: 90px;
+      border-radius: 6px;
+      object-fit: contain;
+    }
+    h1 {
+      margin: 0 0 6px;
+      font-size: 34px;
+      letter-spacing: 0.2px;
+    }
+    p.subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: 17px;
+    }
+    .filters {
+      padding: 0 24px 24px;
+      width: 100%;
+      max-width: 100vw;
+      margin: 0 auto 8px;
+    }
+    .filters-collapsible {
+      margin: 0 0 12px;
+    }
+    .filters-collapsible summary {
+      list-style: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: #e9eef8;
+      color: #12325f;
+      font-weight: 700;
+      font-size: 16px;
+    }
+    .filters-collapsible summary::-webkit-details-marker {
+      display: none;
+    }
+    .filters-collapsible summary::before {
+      content: "+";
+      display: inline-flex;
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      align-items: center;
+      justify-content: center;
+      background: #dbe6fb;
+      color: #12325f;
+      font-weight: 700;
+      font-size: 16px;
+    }
+    .filters-collapsible[open] summary::before {
+      content: "–";
+    }
+    .filters-collapsible > section {
+      margin-top: 14px;
+    }
+    .results {
+      padding: 0 24px 24px;
+      width: 100%;
+      max-width: 100vw;
+      margin: 0 auto 24px;
+    }
+    section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+    section h2 {
+      margin: 0 0 10px;
+      font-size: 22px;
+    }
+    .controls {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(3, minmax(180px, 1fr));
+    }
+    label {
+      display: grid;
+      gap: 6px;
+      font-size: 15px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+    input, select {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 14px;
+      font-size: 18px;
+      background: #fff;
+      color: var(--ink);
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #7aa7f6;
+      box-shadow: 0 0 0 3px rgba(122, 167, 246, 0.25);
+    }
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+    .hint {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    details.advanced {
+      margin-top: 12px;
+      padding-top: 8px;
+      border-top: 1px dashed var(--border);
+    }
+    details.advanced summary {
+      cursor: pointer;
+      font-weight: 600;
+      color: #2b2b2f;
+    }
+    .advanced-controls {
+      margin-top: 10px;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+    button {
+      border: none;
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-weight: 700;
+      font-size: 17px;
+      cursor: pointer;
+      background: var(--accent);
+      color: var(--accent-ink);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+    body.auto-refresh-active button {
+      opacity: 0.35;
+    }
+    body[aria-busy="true"] input,
+    body[aria-busy="true"] select,
+    body[aria-busy="true"] textarea {
+      opacity: 0.6;
+    }
+    #btn-scrape {
+      min-width: 210px;
+    }
+    button.secondary {
+      background: #e9eef8;
+      color: #12325f;
+    }
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 18px rgba(11, 94, 215, 0.18);
+    }
+    .status {
+      margin-top: 10px;
+      font-size: 16px;
+      color: var(--muted);
+      min-height: 18px;
+    }
+    .table-wrap {
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      min-width: 1200px;
+      border-collapse: collapse;
+      font-size: 17px;
+      line-height: 1.6;
+    }
+    th, td {
+      border-bottom: 1px solid var(--border);
+      padding: 14px 16px;
+      text-align: left;
+      white-space: nowrap;
+    }
+    th {
+      background: #f3f4f6;
+      font-size: 14px;
+      color: #2b2b2f;
+      position: sticky;
+      top: 0;
+    }
+    tbody tr:nth-child(even) {
+      background: #f6f7f9;
+    }
+    tbody tr:hover {
+      background: #edf3ff;
+    }
+    .pill {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #eff3ff;
+      color: #2a4aa8;
+      font-size: 13px;
+    }
+    @media (max-width: 720px) {
+      header { padding: 20px 16px 8px; }
+      .filters { padding: 0 16px 16px; }
+      .results { padding: 0 16px 20px; }
+    }
+    @media (max-width: 980px) {
+      .header-actions { justify-content: flex-start; }
+      .header-actions .status { text-align: left; }
+      .controls { grid-template-columns: repeat(2, minmax(160px, 1fr)); }
+    }
+    @media (max-width: 640px) {
+      .controls { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <div class="header-main">
+        <h1>Truck load finder</h1>
+        <p class="subtitle">Automatically retrieves data from the web and displays processed results</p>
+      </div>
+      <div class="header-actions">
+        <div class="header-controls">
+          <label>Overwrite existing data
+            <select id="overwrite">
+              <option value="false" selected>False</option>
+              <option value="true">True</option>
+            </select>
+          </label>
+          <label>Auto-refresh
+            <select id="auto_refresh">
+              <option value="0" selected>Off</option>
+              <option value="20">20 s</option>
+              <option value="60">1 min</option>
+              <option value="600">10 min</option>
+            </select>
+          </label>
+          <button id="btn-scrape">Retrieve data</button>
+          <div class="auto-refresh-status" id="auto-refresh-status"></div>
+          <div class="status" id="status-scrape"></div>
+          <div class="status" id="status-results"></div>
+        </div>
+        <div class="header-brand">
+          <div class="time-stack">
+            <div id="cst-time" class="time-display">CT --:--:--</div>
+            <div id="time-warning" class="time-warning"></div>
+          </div>
+          <img class="brand-icon" src="/favicon.ico" alt="Truck load finder" />
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="filters">
+    <details class="filters-collapsible">
+      <summary>Show filters</summary>
+      <section>
+        <h2>Process data with filters</h2>
+        <div class="controls">
+          <label>Tag<input id="tag" value="" /></label>
+          <label>Date
+            <select id="date">
+              <option id="date_today">Current date</option>
+              <option id="date_next">Next date</option>
+            </select>
+          </label>
+          <label>Limit<input id="limit" type="number" min="1" step="1" value="50" /></label>
+          <label>O-City<input id="o_city" value="" /></label>
+          <label>O-St
+            <select id="o_st">
+              <option value="" selected></option>
+              <option value="AL">AL</option>
+              <option value="AK">AK</option>
+              <option value="AZ">AZ</option>
+              <option value="AR">AR</option>
+              <option value="CA">CA</option>
+              <option value="CO">CO</option>
+              <option value="CT">CT</option>
+              <option value="DE">DE</option>
+              <option value="DC">DC</option>
+              <option value="FL">FL</option>
+              <option value="GA">GA</option>
+              <option value="HI">HI</option>
+              <option value="ID">ID</option>
+              <option value="IL">IL</option>
+              <option value="IN">IN</option>
+              <option value="IA">IA</option>
+              <option value="KS">KS</option>
+              <option value="KY">KY</option>
+              <option value="LA">LA</option>
+              <option value="ME">ME</option>
+              <option value="MD">MD</option>
+              <option value="MA">MA</option>
+              <option value="MI">MI</option>
+              <option value="MN">MN</option>
+              <option value="MS">MS</option>
+              <option value="MO">MO</option>
+              <option value="MT">MT</option>
+              <option value="NE">NE</option>
+              <option value="NV">NV</option>
+              <option value="NH">NH</option>
+              <option value="NJ">NJ</option>
+              <option value="NM">NM</option>
+              <option value="NY">NY</option>
+              <option value="NC">NC</option>
+              <option value="ND">ND</option>
+              <option value="OH">OH</option>
+              <option value="OK">OK</option>
+              <option value="OR">OR</option>
+              <option value="PA">PA</option>
+              <option value="RI">RI</option>
+              <option value="SC">SC</option>
+              <option value="SD">SD</option>
+              <option value="TN">TN</option>
+              <option value="TX">TX</option>
+              <option value="UT">UT</option>
+              <option value="VT">VT</option>
+              <option value="VA">VA</option>
+              <option value="WA">WA</option>
+              <option value="WV">WV</option>
+              <option value="WI">WI</option>
+              <option value="WY">WY</option>
+            </select>
+          </label>
+          <label>O-DH max<input id="o_dh" type="number" min="0" step="1" /></label>
+          <label>D-City<input id="d_city" value="" /></label>
+          <label>D-St
+            <select id="d_st">
+              <option value="" selected></option>
+              <option value="AL">AL</option>
+              <option value="AK">AK</option>
+              <option value="AZ">AZ</option>
+              <option value="AR">AR</option>
+              <option value="CA">CA</option>
+              <option value="CO">CO</option>
+              <option value="CT">CT</option>
+              <option value="DE">DE</option>
+              <option value="DC">DC</option>
+              <option value="FL">FL</option>
+              <option value="GA">GA</option>
+              <option value="HI">HI</option>
+              <option value="ID">ID</option>
+              <option value="IL">IL</option>
+              <option value="IN">IN</option>
+              <option value="IA">IA</option>
+              <option value="KS">KS</option>
+              <option value="KY">KY</option>
+              <option value="LA">LA</option>
+              <option value="ME">ME</option>
+              <option value="MD">MD</option>
+              <option value="MA">MA</option>
+              <option value="MI">MI</option>
+              <option value="MN">MN</option>
+              <option value="MS">MS</option>
+              <option value="MO">MO</option>
+              <option value="MT">MT</option>
+              <option value="NE">NE</option>
+              <option value="NV">NV</option>
+              <option value="NH">NH</option>
+              <option value="NJ">NJ</option>
+              <option value="NM">NM</option>
+              <option value="NY">NY</option>
+              <option value="NC">NC</option>
+              <option value="ND">ND</option>
+              <option value="OH">OH</option>
+              <option value="OK">OK</option>
+              <option value="OR">OR</option>
+              <option value="PA">PA</option>
+              <option value="RI">RI</option>
+              <option value="SC">SC</option>
+              <option value="SD">SD</option>
+              <option value="TN">TN</option>
+              <option value="TX">TX</option>
+              <option value="UT">UT</option>
+              <option value="VT">VT</option>
+              <option value="VA">VA</option>
+              <option value="WA">WA</option>
+              <option value="WV">WV</option>
+              <option value="WI">WI</option>
+              <option value="WY">WY</option>
+            </select>
+          </label>
+          <label>D-DH max<input id="d_dh" type="number" min="0" step="1" /></label>
+          <label>Min match score
+            <input id="min_score" type="number" min="0" step="0.1" value="0" />
+          </label>
+        </div>
+        <details class="advanced">
+          <summary>Advanced</summary>
+          <div class="controls advanced-controls">
+            <label>Tag only unscored
+              <select id="only_unscored">
+                <option value="true">True</option>
+                <option value="false" selected>False</option>
+              </select>
+            </label>
+            <label>Clear tag first
+              <select id="replace">
+                <option value="true" selected>True</option>
+                <option value="false">False</option>
+              </select>
+            </label>
+          </div>
+        </details>
+        <div class="actions">
+          <button id="btn-shortlist" class="secondary">Set filters</button>
+        </div>
+        <p class="hint">Set filters: Applies the above filters.</p>
+        <p class="hint" id="status-working"></p>
+        <div class="status" id="status-shortlist"></div>
+      </section>
+    </details>
+  </div>
+
+  <div class="results">
+    <section>
+      <div class="table-wrap">
+        <table id="results-table">
+          <thead>
+            <tr>
+              <th>Match</th>
+              <th>Rate</th>
+              <th>Company</th>
+              <th>O-City</th>
+              <th>O-St</th>
+              <th>D-City</th>
+              <th>D-St</th>
+              <th>Pickup</th>
+              <th>Distance</th>
+              <th>RPM</th>
+              <th>Equip</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const statusScrape = document.getElementById("status-scrape");
+    const statusShortlist = document.getElementById("status-shortlist");
+    const statusResults = document.getElementById("status-results");
+    const statusWorking = document.getElementById("status-working");
+    const tableBody = document.querySelector("#results-table tbody");
+    const autoRefreshStatus = document.getElementById("auto-refresh-status");
+    const scrapeButton = document.getElementById("btn-scrape");
+    const scrapeButtonLabel = scrapeButton.textContent;
+    const timeDisplay = document.getElementById("cst-time");
+    const timeWarning = document.getElementById("time-warning");
+    let refreshTimer = null;
+    let countdownTimer = null;
+    let nextRefreshAt = null;
+    let hasRunFilters = false;
+    let isRunning = false;
+    let clockTimer = null;
+    let resyncTimer = null;
+    let timeSeconds = null;
+    let timeDate = null;
+    let timeLabel = "CT";
+
+    function clampNonNegative(value, fallback) {
+      if (!Number.isFinite(value)) return fallback;
+      return Math.max(0, value);
+    }
+
+    function optionalInt(value) {
+      const text = String(value ?? "").trim();
+      if (!text) return null;
+      const parsed = parseInt(text, 10);
+      if (!Number.isFinite(parsed)) return null;
+      return Math.max(0, parsed);
+    }
+
+    function payloadFromForm() {
+      const oDh = optionalInt(document.getElementById("o_dh").value);
+      const dDh = optionalInt(document.getElementById("d_dh").value);
+      const limit = clampNonNegative(parseInt(document.getElementById("limit").value, 10), 1) || 1;
+      return {
+        tag: document.getElementById("tag").value,
+        date: document.getElementById("date").value,
+        "O-City": document.getElementById("o_city").value,
+        "O-St": document.getElementById("o_st").value,
+        "D-City": document.getElementById("d_city").value,
+        "D-St": document.getElementById("d_st").value,
+        "O-DH": oDh,
+        "D-DH": dDh,
+        limit: limit,
+        only_unscored: document.getElementById("only_unscored").value === "true",
+        replace: document.getElementById("replace").value === "true"
+      };
+    }
+
+    function minScore() {
+      const raw = document.getElementById("min_score").value;
+      const parsed = parseFloat(raw);
+      return clampNonNegative(parsed, 0);
+    }
+
+    async function postJson(path, payload) {
+      const res = await fetch(path, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || res.statusText);
+      }
+      return res.json();
+    }
+
+    async function sendTiming(label, ms) {
+      try {
+        await fetch("/timing", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ label, ms })
+        });
+      } catch (err) {
+        return;
+      }
+    }
+
+    function refreshIntervalSeconds() {
+      const raw = document.getElementById("auto_refresh").value;
+      const parsed = parseInt(raw, 10);
+      return Number.isFinite(parsed) ? parsed : 0;
+    }
+
+    function updateAutoRefreshStatus({ running } = { running: false }) {
+      const seconds = refreshIntervalSeconds();
+      if (seconds <= 0) {
+        autoRefreshStatus.textContent = "";
+        return;
+      }
+      autoRefreshStatus.textContent = "";
+    }
+
+    function updateCountdownLabel() {
+      if (!nextRefreshAt) {
+        return;
+      }
+      const remainingSeconds = Math.max(0, Math.ceil((nextRefreshAt - Date.now()) / 1000));
+      scrapeButton.textContent = `Retrieve in ${remainingSeconds}s`;
+    }
+
+    function clearCountdown() {
+      if (countdownTimer) {
+        clearInterval(countdownTimer);
+        countdownTimer = null;
+      }
+      nextRefreshAt = null;
+    }
+
+    function updateAutoRefreshControls() {
+      const seconds = refreshIntervalSeconds();
+      if (scrapeButton) {
+        scrapeButton.disabled = seconds > 0;
+      }
+      if (seconds <= 0) {
+        clearCountdown();
+        scrapeButton.textContent = scrapeButtonLabel;
+        return;
+      }
+      if (!hasRunFilters) {
+        scrapeButton.textContent = "Auto refresh pending";
+        return;
+      }
+      updateCountdownLabel();
+    }
+
+    function setAutoRefresh() {
+      if (refreshTimer) {
+        clearInterval(refreshTimer);
+        refreshTimer = null;
+      }
+      const seconds = refreshIntervalSeconds();
+      if (seconds > 0 && hasRunFilters) {
+        nextRefreshAt = Date.now() + seconds * 1000;
+        updateCountdownLabel();
+        if (!countdownTimer) {
+          countdownTimer = setInterval(updateCountdownLabel, 1000);
+        }
+        refreshTimer = setInterval(() => {
+          runFiltersAndLoad({ runScrape: true });
+        }, seconds * 1000);
+      } else {
+        clearCountdown();
+      }
+      updateAutoRefreshStatus({ running: false });
+      updateAutoRefreshControls();
+    }
+
+    function setBusyState(isBusy) {
+      const controls = document.querySelectorAll("button, input, select, textarea");
+      controls.forEach(control => {
+        control.disabled = isBusy;
+      });
+      document.body.setAttribute("aria-busy", isBusy ? "true" : "false");
+      if (statusWorking) {
+        statusWorking.textContent = isBusy ? "Working..." : "";
+      }
+      if (!isBusy) {
+        updateAutoRefreshControls();
+      }
+    }
+
+    async function runScrape() {
+      statusScrape.textContent = "Running scrape...";
+      const overwrite = document.getElementById("overwrite").value === "true";
+      const result = await postJson("/scrape", { overwrite });
+      statusScrape.textContent = `Retrieved ${result.total_returned} loads. Inserted ${result.inserted}, updated ${result.updated}. Total Loads: ${result.total_in_db}`;
+      return result;
+    }
+
+    function renderTable(rows) {
+      tableBody.innerHTML = "";
+      rows.forEach(row => {
+        const tr = document.createElement("tr");
+        const match = row.match_score == null ? "" : row.match_score.toFixed(1);
+        tr.innerHTML = [
+          match ? `<span class="pill">${match}</span>` : "",
+          row["Rate"],
+          row["Company"],
+          row["O-City"],
+          row["O-St"],
+          row["D-City"],
+          row["D-St"],
+          row["Pickup"],
+          row["Distance"],
+          row["RPM"],
+          row["Equip"]
+        ].map(val => `<td>${val ?? ""}</td>`).join("");
+        tableBody.appendChild(tr);
+      });
+    }
+
+    async function runFiltersAndLoad({ runScrape: shouldScrape = false } = {}) {
+      if (isRunning) return;
+      const startMs = performance.now();
+      isRunning = true;
+      if (shouldScrape) {
+        document.body.classList.add("auto-refresh-active");
+        clearCountdown();
+        scrapeButton.textContent = "Refreshing...";
+      }
+      setBusyState(true);
+      updateAutoRefreshStatus({ running: true });
+      statusShortlist.textContent = shouldScrape
+        ? "Refreshing data, tagging, and scoring..."
+        : "Tagging and scoring...";
+      try {
+        if (shouldScrape) {
+          await runScrape();
+        }
+        const payload = payloadFromForm();
+        const shortlistResult = await postJson("/shortlist", payload);
+        const tag = shortlistResult.tag;
+        const scoreResult = await postJson("/loads/score", {
+          tag,
+          only_unscored: payload.only_unscored,
+          limit: shortlistResult.total
+        });
+        const queryPayload = {
+          ...payload,
+          tag,
+          only_unscored: false
+        };
+        const result = await postJson("/loads/query", queryPayload);
+        const threshold = minScore();
+        const sorted = (result.results || []).slice().sort((a, b) => {
+          const aScore = a.match_score;
+          const bScore = b.match_score;
+          if (aScore == null && bScore == null) return 0;
+          if (aScore == null) return 1;
+          if (bScore == null) return -1;
+          return bScore - aScore;
+        });
+        const rows = sorted.filter(r => r.match_score != null && r.match_score >= threshold);
+        renderTable(rows);
+        statusShortlist.textContent = `Tagged ${shortlistResult.marked}. Total tagged: ${shortlistResult.total}. Scored ${scoreResult.scored}.`;
+        statusResults.innerHTML = `<strong>Results:</strong> Showing ${rows.length} of ${result.count} results (min match score ${threshold}).`;
+        sendTiming("filters_pipeline", Math.round(performance.now() - startMs));
+        hasRunFilters = true;
+        setAutoRefresh();
+        updateAutoRefreshControls();
+      } catch (err) {
+        statusShortlist.textContent = `Run filters failed: ${err.message}`;
+      } finally {
+        isRunning = false;
+        setBusyState(false);
+        updateAutoRefreshStatus({ running: false });
+        if (shouldScrape) {
+          document.body.classList.remove("auto-refresh-active");
+        }
+      }
+    }
+
+    document.getElementById("btn-scrape").addEventListener("click", async () => {
+      try {
+        await runScrape();
+      } catch (err) {
+        statusScrape.textContent = `Scrape failed: ${err.message}`;
+      }
+    });
+
+    document.getElementById("btn-shortlist").addEventListener("click", async () => {
+      await runFiltersAndLoad({ runScrape: false });
+    });
+
+    document.getElementById("auto_refresh").addEventListener("change", () => {
+      setAutoRefresh();
+    });
+
+    function addDays(dateStr, days) {
+      const [year, month, day] = dateStr.split("-").map(Number);
+      const base = new Date(Date.UTC(year, month - 1, day));
+      base.setUTCDate(base.getUTCDate() + days);
+      return base.toISOString().slice(0, 10);
+    }
+
+    function setDateOptionsFromDate(dateStr) {
+      const todayOption = document.getElementById("date_today");
+      const nextOption = document.getElementById("date_next");
+      if (todayOption) {
+        todayOption.value = dateStr;
+      }
+      if (nextOption) {
+        nextOption.value = addDays(dateStr, 1);
+      }
+    }
+
+    function timeStringToSeconds(timeStr) {
+      const [hours, minutes, seconds] = timeStr.split(":").map(Number);
+      if ([hours, minutes, seconds].some(val => Number.isNaN(val))) return 0;
+      return (hours * 3600) + (minutes * 60) + seconds;
+    }
+
+    function formatTimeFromSeconds(seconds) {
+      const hours = Math.floor(seconds / 3600) % 24;
+      const minutes = Math.floor((seconds % 3600) / 60);
+      const remainder = seconds % 60;
+      return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(remainder).padStart(2, "0")}`;
+    }
+
+    function updateTimeDisplay() {
+      if (!timeDisplay || timeSeconds == null || !timeDate) return;
+      timeDisplay.textContent = `${timeLabel} ${formatTimeFromSeconds(timeSeconds)}`;
+    }
+
+    function tickClock() {
+      if (timeSeconds == null || !timeDate) return;
+      timeSeconds += 1;
+      if (timeSeconds >= 86400) {
+        timeSeconds -= 86400;
+        timeDate = addDays(timeDate, 1);
+      }
+      updateTimeDisplay();
+    }
+
+    function setTimeState(dateStr, timeStr, label) {
+      timeDate = dateStr;
+      timeSeconds = timeStringToSeconds(timeStr);
+      timeLabel = label || "CT";
+      updateTimeDisplay();
+      if (!clockTimer) {
+        clockTimer = setInterval(tickClock, 1000);
+      }
+    }
+
+    function parseApiDateTime(dateTime) {
+      if (!dateTime) return null;
+      const [datePart, timePartRaw] = dateTime.split("T");
+      if (!datePart || !timePartRaw) return null;
+      const timePart = timePartRaw.split(".")[0];
+      const timeStr = timePart.length >= 8 ? timePart.slice(0, 8) : timePart;
+      return { dateStr: datePart, timeStr };
+    }
+
+    function getChicagoPartsFromLocal(date) {
+      const formatter = new Intl.DateTimeFormat("en-US", {
+        timeZone: "America/Chicago",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false,
+        timeZoneName: "short"
+      });
+      const parts = formatter.formatToParts(date);
+      const mapped = {};
+      parts.forEach(part => {
+        if (part.type !== "literal") {
+          mapped[part.type] = part.value;
+        }
+      });
+      const dateStr = `${mapped.year}-${mapped.month}-${mapped.day}`;
+      const timeStr = `${mapped.hour}:${mapped.minute}:${mapped.second}`;
+      const label = mapped.timeZoneName || "CT";
+      return { dateStr, timeStr, label };
+    }
+
+    async function syncTime() {
+      try {
+        const res = await fetch("https://timeapi.io/api/Time/current/zone?timeZone=America/Chicago");
+        if (!res.ok) {
+          throw new Error("Time API request failed");
+        }
+        const data = await res.json();
+        const parsed = parseApiDateTime(data.dateTime);
+        if (!parsed) {
+          throw new Error("Invalid time API response");
+        }
+        const label = data.isDaylightSavingTime ? "CDT" : "CST";
+        setTimeState(parsed.dateStr, parsed.timeStr, label);
+        setDateOptionsFromDate(parsed.dateStr);
+        if (timeWarning) {
+          timeWarning.textContent = "";
+        }
+      } catch (err) {
+        if (timeWarning) {
+          timeWarning.textContent = "Time sync failed — using local clock";
+        }
+        const fallback = getChicagoPartsFromLocal(new Date());
+        setTimeState(fallback.dateStr, fallback.timeStr, fallback.label);
+        setDateOptionsFromDate(fallback.dateStr);
+      }
+    }
+
+    syncTime();
+    if (!resyncTimer) {
+      resyncTimer = setInterval(syncTime, 600000);
+    }
+    updateAutoRefreshControls();
+  </script>
+</body>
+</html>

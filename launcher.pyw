@@ -67,7 +67,7 @@ def main() -> None:
 
     data_dir = ensure_app_data_dir()
     os.environ["LOADS_DB_PATH"] = os.path.join(data_dir, "loads.db")
-    os.environ["SAMPLE_LOADS_PATH"] = resource_path("sample_loads.json")
+    os.environ["SAMPLE_LOADS_PATH"] = resource_path(os.path.join("data", "sample_loads.json"))
 
     browser_thread = threading.Thread(
         target=open_browser_later,
@@ -77,7 +77,7 @@ def main() -> None:
     browser_thread.start()
 
     uvicorn.run(
-        "load_api:app",
+        "src.main:app",
         host=HOST,
         port=PORT,
         log_level="warning",

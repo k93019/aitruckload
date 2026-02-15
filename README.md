@@ -1,23 +1,24 @@
 # Load Finder (LLM Quick Reference)
 
 ## Purpose
-- Single-file FastAPI app that serves an HTML UI and JSON API to scrape (sample data), shortlist, score, and query truck loads.
+- FastAPI app that serves an HTML UI and JSON API to scrape (sample data), shortlist, score, and query truck loads.
 - Uses SQLite for storage and a deterministic load key for upserts.
 - Copyright © 2025 Lighthouse Labs & Innovation.
 
 ## Runtime
 - Install deps: `pip install -r requirements.txt`
-- Run server: `python -m uvicorn load_api:app --reload`
+- Run server: `python -m uvicorn src.main:app --reload`
 - UI: `http://127.0.0.1:8000/`
 
 ## Key Files
-- `load_api.py`: FastAPI app, HTML UI, DB logic, scoring logic, endpoints.
-- `sample_loads.json`: input dataset used by `/scrape`.
+- `src/main.py`: FastAPI app, DB logic, scoring logic, endpoints.
+- `src/templates/index.html`: HTML UI.
+- `data/sample_loads.json`: input dataset used by `/scrape`.
 - `loads.db`: default SQLite DB file.
 
 ## Environment Defaults
 - `LOADS_DB_PATH` (default `loads.db`)
-- `SAMPLE_LOADS_PATH` (default `sample_loads.json`)
+- `SAMPLE_LOADS_PATH` (default `data/sample_loads.json`)
 - `TIMING_LOGS=1` enables JSONL timing logs (server + client).
 - `TIMING_LOG_PATH` sets log path (default `timing.log`).
 
@@ -28,9 +29,9 @@
 4) `/loads/query` returns filtered and scored results.
 
 ## Endpoints
-- `GET /`: HTML UI (single page inside `load_api.py`).
+- `GET /`: HTML UI (template at `src/templates/index.html`).
 - `GET /health`: `{ "status": "ok" }`.
-- `GET /favicon.ico`: serves `Resources/truck_loads_icon.ico`.
+- `GET /favicon.ico`: serves `src/assets/icons/truck_loads_icon.ico`.
 - `POST /scrape`: `{ overwrite?: bool, db_path?: str, sample_path?: str }`.
   - If `overwrite` is true, deletes all rows from `loads` before inserting.
   - If false, upserts by `load_key` (updates existing rows).
@@ -57,7 +58,7 @@
 - Missing D2P applies penalty.
 - Final score clamped to 0..10 and rounded to 1 decimal.
 
-## UI Behavior (HTML in `load_api.py`)
+## UI Behavior (HTML in `src/templates/index.html`)
 - “Retrieve data” calls `/scrape`.
 - “Set filters” triggers shortlist + score + query.
 - Auto-refresh triggers the same pipeline on a timer; countdown indicates activity.
@@ -70,7 +71,7 @@
 - UI scores all tagged loads (no show-unscored toggle).
 
 ## Notes for LLMs
-- All logic lives in `load_api.py`; there is no separate frontend build.
+- All logic lives in `src/main.py`; there is no separate frontend build.
 - Filtering logic is SQL-based in `run_shortlist()` and `query_loads()`.
 - Payloads use aliases like `O-City` and `D-St` (Pydantic aliases set in models).
 
