@@ -2,6 +2,8 @@
 __pycache__/
 *.pyc
 jobs.db
+loads.db
+loads_test.db
 accomplishment_inventory.md
 *.log
 .env
