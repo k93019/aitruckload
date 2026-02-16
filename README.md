@@ -10,6 +10,20 @@
 - Run server: `python -m uvicorn src.main:app --reload`
 - UI: `http://127.0.0.1:8000/`
 
+## Windows EXE Quick Start
+- Install the latest `TruckLoadFinderSetup-<version>.exe`.
+- Launch “Truck load finder”.
+- Click “Retrieve data”, then “Set filters” to populate results.
+- Use “Close App” to stop the server and release port 8000.
+
+## UI Controls
+- “Reset App” clears the UI state (filters, statuses, table) without deleting data.
+- “Close App” shuts down the local server; you can close the browser afterward.
+
+## Data Paths
+- DB path: `%LOCALAPPDATA%\Truck Load Finder\loads.db`
+- Error log: `%LOCALAPPDATA%\Truck Load Finder\error.log`
+
 ## Windows Installer (GitHub Actions)
 - Builds on each push to `main` and uploads the installer as a workflow artifact.
 - Releases are created on tags like `v1.0.2` with `TruckLoadFinderSetup-<version>.exe` attached.
@@ -22,6 +36,7 @@
 - `src/templates/index.html`: HTML UI.
 - `data/sample_loads.json`: input dataset used by `/scrape`.
 - `loads.db`: default SQLite DB file.
+- `launcher.pyw`: Windows launcher (starts server, opens browser).
 
 ## Environment Defaults
 - `LOADS_DB_PATH` (default `loads.db`)
@@ -34,6 +49,10 @@
 2) `/shortlist` tags a subset of loads based on filters.
 3) `/loads/score` computes `match_score` for tagged loads.
 4) `/loads/query` returns filtered and scored results.
+
+## Troubleshooting
+- Port 8000 in use: click “Close App” or end the running process and relaunch.
+- “Internal server error”: open `%LOCALAPPDATA%\Truck Load Finder\error.log`.
 
 ## Endpoints
 - `GET /`: HTML UI (template at `src/templates/index.html`).
@@ -81,6 +100,7 @@
 - All logic lives in `src/main.py`; there is no separate frontend build.
 - Filtering logic is SQL-based in `run_shortlist()` and `query_loads()`.
 - Payloads use aliases like `O-City` and `D-St` (Pydantic aliases set in models).
+- The UI is a single HTML file with inline CSS/JS.
 
 ## License
 - Apache-2.0. See `LICENSE` and `NOTICE` for attribution details.
