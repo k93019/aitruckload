@@ -8,6 +8,8 @@ import webbrowser
 
 import uvicorn
 
+from src.main import app
+
 
 APP_NAME = "Truck Load Finder"
 HOST = "127.0.0.1"
@@ -89,13 +91,20 @@ def main() -> None:
         browser_thread.start()
 
         uvicorn.run(
-            "src.main:app",
+            app,
             host=HOST,
             port=PORT,
             log_config=None,
             log_level="warning",
         )
     except Exception:
+        trace = traceback.format_exc()
+        log_path = write_error_log(trace)
+        show_error(
+            f"{APP_NAME} failed to start.\n\n"
+            f"Details were written to:\n{log_path}"
+        )
+    except BaseException:
         trace = traceback.format_exc()
         log_path = write_error_log(trace)
         show_error(
