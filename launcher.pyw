@@ -5,6 +5,7 @@ import threading
 import time
 import traceback
 import webbrowser
+from urllib import request as url_request
 
 import uvicorn
 
@@ -42,6 +43,15 @@ def is_port_in_use(host: str, port: int) -> bool:
     return False
 
 
+def is_existing_server_healthy(host: str, port: int) -> bool:
+    url = f"http://{host}:{port}/health"
+    try:
+        with url_request.urlopen(url, timeout=1.0) as res:
+            return res.status == 200
+    except Exception:
+        return False
+
+
 def show_error(message: str) -> None:
     try:
         import tkinter as tk
@@ -73,6 +83,9 @@ def write_error_log(message: str) -> str:
 def main() -> None:
     try:
         if is_port_in_use(HOST, PORT):
+            if is_existing_server_healthy(HOST, PORT):
+                open_browser_later(f"http://{HOST}:{PORT}/", delay_seconds=0.2)
+                return
             show_error(
                 f"{APP_NAME} could not start because port {PORT} is already in use. "
                 "Close the other app using that port and try again."
