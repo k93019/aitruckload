@@ -36,16 +36,24 @@
     .header-inner {
       display: flex;
       gap: 16px;
-      align-items: center;
+      align-items: flex-start;
       justify-content: space-between;
       flex-wrap: wrap;
     }
     .header-main {
-      min-width: 240px;
-      flex: 1;
+      margin-left: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+      justify-content: flex-start;
+      min-width: 280px;
+    }
+    .header-brand-row {
       display: flex;
       align-items: flex-start;
-      gap: 16px;
+      gap: 12px;
+      justify-content: flex-end;
     }
     .header-logo {
       display: flex;
@@ -68,7 +76,7 @@
       display: flex;
       gap: 12px;
       align-items: center;
-      justify-content: flex-end;
+      justify-content: flex-start;
       flex-wrap: wrap;
       flex: 1;
     }
@@ -76,15 +84,21 @@
       display: flex;
       gap: 12px;
       align-items: flex-start;
-      justify-content: flex-end;
+      justify-content: flex-start;
       flex-wrap: wrap;
     }
-    .header-right {
-      margin-left: auto;
+    .header-actions-bottom {
       display: flex;
       flex-direction: column;
       align-items: flex-end;
-      gap: 8px;
+      gap: 6px;
+      padding: 6px 24px 8px;
+    }
+    .header-button-status {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 2px;
     }
     .header-buttons {
       display: flex;
@@ -147,13 +161,17 @@
       object-fit: contain;
     }
     .filters {
-      padding: 0 24px 12px;
+      padding: 0;
       width: 100%;
-      max-width: 100vw;
-      margin: 6px auto 4px;
+      max-width: 980px;
+      margin: 0;
+      display: flex;
+      justify-content: flex-end;
     }
     .filters-collapsible {
       margin: 0;
+      width: 100%;
+      max-width: 980px;
     }
     .filters-collapsible summary {
       list-style: none;
@@ -365,7 +383,7 @@
       .header-actions { justify-content: flex-start; }
       .header-actions .status { text-align: left; }
       .title-row { flex-wrap: wrap; }
-      .header-main { flex-wrap: wrap; }
+      .header-brand-row { flex-wrap: wrap; }
       .controls { grid-template-columns: repeat(2, minmax(160px, 1fr)); }
     }
     @media (max-width: 640px) {
@@ -376,18 +394,6 @@
 <body>
   <header>
     <div class="header-inner">
-      <div class="header-main">
-        <div class="header-logo">
-          <img class="brand-icon" src="/favicon.ico" alt="Truck load finder" />
-          <div class="time-stack">
-            <div id="cst-time" class="time-display">CT --:--:--</div>
-            <div id="time-warning" class="time-warning"></div>
-          </div>
-        </div>
-        <div class="title-row">
-          <h1>Truck load finder</h1>
-        </div>
-      </div>
       <div class="header-actions">
         <div class="header-controls">
           <label>Overwrite existing data
@@ -412,177 +418,193 @@
             <div class="auto-refresh-status" id="auto-refresh-status"></div>
           </div>
         </div>
-        <div class="header-right">
-          <div class="header-buttons">
-            <button id="btn-reset" class="button-dark">Reset App</button>
-            <button id="btn-close" class="button-dark">Close App</button>
+      </div>
+      <div class="header-main">
+        <div class="header-brand-row">
+          <div class="header-logo">
+            <img class="brand-icon" src="/favicon.ico" alt="Truck load finder" />
+            <div class="time-stack">
+              <div id="cst-time" class="time-display">CT --:--:--</div>
+              <div id="time-warning" class="time-warning"></div>
+            </div>
           </div>
-          <div class="status" id="status-quit"></div>
-          <div class="status" id="status-reset"></div>
+          <div class="title-row">
+            <h1>Truck load finder</h1>
+          </div>
+        </div>
+        <div class="filters">
+          <details class="filters-collapsible">
+            <summary>Show filters</summary>
+            <section>
+              <h2>Process data with filters</h2>
+              <div class="controls">
+                <label>Tag<input id="tag" value="" /></label>
+                <label>Date
+                  <select id="date">
+                    <option id="date_today">Current date</option>
+                    <option id="date_next">Next date</option>
+                  </select>
+                </label>
+                <label>Limit<input id="limit" type="number" min="1" step="1" value="50" /></label>
+                <label>O-City<input id="o_city" value="" /></label>
+                <label>O-St
+                  <select id="o_st">
+                    <option value="" selected></option>
+                    <option value="AL">AL</option>
+                    <option value="AK">AK</option>
+                    <option value="AZ">AZ</option>
+                    <option value="AR">AR</option>
+                    <option value="CA">CA</option>
+                    <option value="CO">CO</option>
+                    <option value="CT">CT</option>
+                    <option value="DE">DE</option>
+                    <option value="DC">DC</option>
+                    <option value="FL">FL</option>
+                    <option value="GA">GA</option>
+                    <option value="HI">HI</option>
+                    <option value="ID">ID</option>
+                    <option value="IL">IL</option>
+                    <option value="IN">IN</option>
+                    <option value="IA">IA</option>
+                    <option value="KS">KS</option>
+                    <option value="KY">KY</option>
+                    <option value="LA">LA</option>
+                    <option value="ME">ME</option>
+                    <option value="MD">MD</option>
+                    <option value="MA">MA</option>
+                    <option value="MI">MI</option>
+                    <option value="MN">MN</option>
+                    <option value="MS">MS</option>
+                    <option value="MO">MO</option>
+                    <option value="MT">MT</option>
+                    <option value="NE">NE</option>
+                    <option value="NV">NV</option>
+                    <option value="NH">NH</option>
+                    <option value="NJ">NJ</option>
+                    <option value="NM">NM</option>
+                    <option value="NY">NY</option>
+                    <option value="NC">NC</option>
+                    <option value="ND">ND</option>
+                    <option value="OH">OH</option>
+                    <option value="OK">OK</option>
+                    <option value="OR">OR</option>
+                    <option value="PA">PA</option>
+                    <option value="RI">RI</option>
+                    <option value="SC">SC</option>
+                    <option value="SD">SD</option>
+                    <option value="TN">TN</option>
+                    <option value="TX">TX</option>
+                    <option value="UT">UT</option>
+                    <option value="VT">VT</option>
+                    <option value="VA">VA</option>
+                    <option value="WA">WA</option>
+                    <option value="WV">WV</option>
+                    <option value="WI">WI</option>
+                    <option value="WY">WY</option>
+                  </select>
+                </label>
+                <label>O-DH max<input id="o_dh" type="number" min="0" step="1" /></label>
+                <label>D-City<input id="d_city" value="" /></label>
+                <label>D-St
+                  <select id="d_st">
+                    <option value="" selected></option>
+                    <option value="AL">AL</option>
+                    <option value="AK">AK</option>
+                    <option value="AZ">AZ</option>
+                    <option value="AR">AR</option>
+                    <option value="CA">CA</option>
+                    <option value="CO">CO</option>
+                    <option value="CT">CT</option>
+                    <option value="DE">DE</option>
+                    <option value="DC">DC</option>
+                    <option value="FL">FL</option>
+                    <option value="GA">GA</option>
+                    <option value="HI">HI</option>
+                    <option value="ID">ID</option>
+                    <option value="IL">IL</option>
+                    <option value="IN">IN</option>
+                    <option value="IA">IA</option>
+                    <option value="KS">KS</option>
+                    <option value="KY">KY</option>
+                    <option value="LA">LA</option>
+                    <option value="ME">ME</option>
+                    <option value="MD">MD</option>
+                    <option value="MA">MA</option>
+                    <option value="MI">MI</option>
+                    <option value="MN">MN</option>
+                    <option value="MS">MS</option>
+                    <option value="MO">MO</option>
+                    <option value="MT">MT</option>
+                    <option value="NE">NE</option>
+                    <option value="NV">NV</option>
+                    <option value="NH">NH</option>
+                    <option value="NJ">NJ</option>
+                    <option value="NM">NM</option>
+                    <option value="NY">NY</option>
+                    <option value="NC">NC</option>
+                    <option value="ND">ND</option>
+                    <option value="OH">OH</option>
+                    <option value="OK">OK</option>
+                    <option value="OR">OR</option>
+                    <option value="PA">PA</option>
+                    <option value="RI">RI</option>
+                    <option value="SC">SC</option>
+                    <option value="SD">SD</option>
+                    <option value="TN">TN</option>
+                    <option value="TX">TX</option>
+                    <option value="UT">UT</option>
+                    <option value="VT">VT</option>
+                    <option value="VA">VA</option>
+                    <option value="WA">WA</option>
+                    <option value="WV">WV</option>
+                    <option value="WI">WI</option>
+                    <option value="WY">WY</option>
+                  </select>
+                </label>
+                <label>D-DH max<input id="d_dh" type="number" min="0" step="1" /></label>
+                <label>Rate min<input id="rate_min" type="number" min="0" step="1" /></label>
+                <label>Rate max<input id="rate_max" type="number" min="0" step="1" /></label>
+                <label>Min match score
+                  <input id="min_score" type="number" min="0" step="0.1" value="0" />
+                </label>
+              </div>
+              <details class="advanced">
+                <summary>Advanced</summary>
+                <div class="controls advanced-controls">
+                  <label>Tag only unscored
+                    <select id="only_unscored">
+                      <option value="true">True</option>
+                      <option value="false" selected>False</option>
+                    </select>
+                  </label>
+                  <label>Clear tag first
+                    <select id="replace">
+                      <option value="true" selected>True</option>
+                      <option value="false">False</option>
+                    </select>
+                  </label>
+                </div>
+              </details>
+              <div class="actions">
+                <button id="btn-shortlist" class="secondary">Set filters</button>
+              </div>
+              <p class="hint">Set filters: Applies the above filters.</p>
+              <p class="hint" id="status-working"></p>
+              <div class="status" id="status-shortlist"></div>
+            </section>
+          </details>
         </div>
       </div>
     </div>
-    <div class="filters">
-      <details class="filters-collapsible">
-        <summary>Show filters</summary>
-        <section>
-          <h2>Process data with filters</h2>
-          <div class="controls">
-            <label>Tag<input id="tag" value="" /></label>
-            <label>Date
-              <select id="date">
-                <option id="date_today">Current date</option>
-                <option id="date_next">Next date</option>
-              </select>
-            </label>
-            <label>Limit<input id="limit" type="number" min="1" step="1" value="50" /></label>
-            <label>O-City<input id="o_city" value="" /></label>
-            <label>O-St
-              <select id="o_st">
-                <option value="" selected></option>
-                <option value="AL">AL</option>
-                <option value="AK">AK</option>
-                <option value="AZ">AZ</option>
-                <option value="AR">AR</option>
-                <option value="CA">CA</option>
-                <option value="CO">CO</option>
-                <option value="CT">CT</option>
-                <option value="DE">DE</option>
-                <option value="DC">DC</option>
-                <option value="FL">FL</option>
-                <option value="GA">GA</option>
-                <option value="HI">HI</option>
-                <option value="ID">ID</option>
-                <option value="IL">IL</option>
-                <option value="IN">IN</option>
-                <option value="IA">IA</option>
-                <option value="KS">KS</option>
-                <option value="KY">KY</option>
-                <option value="LA">LA</option>
-                <option value="ME">ME</option>
-                <option value="MD">MD</option>
-                <option value="MA">MA</option>
-                <option value="MI">MI</option>
-                <option value="MN">MN</option>
-                <option value="MS">MS</option>
-                <option value="MO">MO</option>
-                <option value="MT">MT</option>
-                <option value="NE">NE</option>
-                <option value="NV">NV</option>
-                <option value="NH">NH</option>
-                <option value="NJ">NJ</option>
-                <option value="NM">NM</option>
-                <option value="NY">NY</option>
-                <option value="NC">NC</option>
-                <option value="ND">ND</option>
-                <option value="OH">OH</option>
-                <option value="OK">OK</option>
-                <option value="OR">OR</option>
-                <option value="PA">PA</option>
-                <option value="RI">RI</option>
-                <option value="SC">SC</option>
-                <option value="SD">SD</option>
-                <option value="TN">TN</option>
-                <option value="TX">TX</option>
-                <option value="UT">UT</option>
-                <option value="VT">VT</option>
-                <option value="VA">VA</option>
-                <option value="WA">WA</option>
-                <option value="WV">WV</option>
-                <option value="WI">WI</option>
-                <option value="WY">WY</option>
-              </select>
-            </label>
-            <label>O-DH max<input id="o_dh" type="number" min="0" step="1" /></label>
-            <label>D-City<input id="d_city" value="" /></label>
-            <label>D-St
-              <select id="d_st">
-                <option value="" selected></option>
-                <option value="AL">AL</option>
-                <option value="AK">AK</option>
-                <option value="AZ">AZ</option>
-                <option value="AR">AR</option>
-                <option value="CA">CA</option>
-                <option value="CO">CO</option>
-                <option value="CT">CT</option>
-                <option value="DE">DE</option>
-                <option value="DC">DC</option>
-                <option value="FL">FL</option>
-                <option value="GA">GA</option>
-                <option value="HI">HI</option>
-                <option value="ID">ID</option>
-                <option value="IL">IL</option>
-                <option value="IN">IN</option>
-                <option value="IA">IA</option>
-                <option value="KS">KS</option>
-                <option value="KY">KY</option>
-                <option value="LA">LA</option>
-                <option value="ME">ME</option>
-                <option value="MD">MD</option>
-                <option value="MA">MA</option>
-                <option value="MI">MI</option>
-                <option value="MN">MN</option>
-                <option value="MS">MS</option>
-                <option value="MO">MO</option>
-                <option value="MT">MT</option>
-                <option value="NE">NE</option>
-                <option value="NV">NV</option>
-                <option value="NH">NH</option>
-                <option value="NJ">NJ</option>
-                <option value="NM">NM</option>
-                <option value="NY">NY</option>
-                <option value="NC">NC</option>
-                <option value="ND">ND</option>
-                <option value="OH">OH</option>
-                <option value="OK">OK</option>
-                <option value="OR">OR</option>
-                <option value="PA">PA</option>
-                <option value="RI">RI</option>
-                <option value="SC">SC</option>
-                <option value="SD">SD</option>
-                <option value="TN">TN</option>
-                <option value="TX">TX</option>
-                <option value="UT">UT</option>
-                <option value="VT">VT</option>
-                <option value="VA">VA</option>
-                <option value="WA">WA</option>
-                <option value="WV">WV</option>
-                <option value="WI">WI</option>
-                <option value="WY">WY</option>
-              </select>
-            </label>
-            <label>D-DH max<input id="d_dh" type="number" min="0" step="1" /></label>
-            <label>Rate min<input id="rate_min" type="number" min="0" step="1" /></label>
-            <label>Rate max<input id="rate_max" type="number" min="0" step="1" /></label>
-            <label>Min match score
-              <input id="min_score" type="number" min="0" step="0.1" value="0" />
-            </label>
-          </div>
-          <details class="advanced">
-            <summary>Advanced</summary>
-            <div class="controls advanced-controls">
-              <label>Tag only unscored
-                <select id="only_unscored">
-                  <option value="true">True</option>
-                  <option value="false" selected>False</option>
-                </select>
-              </label>
-              <label>Clear tag first
-                <select id="replace">
-                  <option value="true" selected>True</option>
-                  <option value="false">False</option>
-                </select>
-              </label>
-            </div>
-          </details>
-          <div class="actions">
-            <button id="btn-shortlist" class="secondary">Set filters</button>
-          </div>
-          <p class="hint">Set filters: Applies the above filters.</p>
-          <p class="hint" id="status-working"></p>
-          <div class="status" id="status-shortlist"></div>
-        </section>
-      </details>
+    <div class="header-actions-bottom">
+      <div class="header-buttons">
+        <button id="btn-reset" class="button-dark">Reset App</button>
+        <button id="btn-close" class="button-dark">Close App</button>
+      </div>
+      <div class="header-button-status">
+        <div class="status" id="status-quit"></div>
+        <div class="status" id="status-reset"></div>
+      </div>
     </div>
   </header>
 
