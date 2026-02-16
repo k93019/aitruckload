@@ -9,8 +9,6 @@ from urllib import request as url_request
 
 import uvicorn
 
-from src.main import app
-
 
 APP_NAME = "Truck Load Finder"
 HOST = "127.0.0.1"
@@ -23,7 +21,7 @@ def resource_path(relative_path: str) -> str:
 
 
 def app_data_dir() -> str:
-    base = os.getenv("APPDATA") or os.path.expanduser("~")
+    base = os.getenv("LOCALAPPDATA") or os.getenv("APPDATA") or os.path.expanduser("~")
     return os.path.join(base, APP_NAME)
 
 
@@ -95,6 +93,8 @@ def main() -> None:
         data_dir = ensure_app_data_dir()
         os.environ["LOADS_DB_PATH"] = os.path.join(data_dir, "loads.db")
         os.environ["SAMPLE_LOADS_PATH"] = resource_path(os.path.join("data", "sample_loads.json"))
+
+        from src.main import app
 
         browser_thread = threading.Thread(
             target=open_browser_later,
