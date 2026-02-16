@@ -514,6 +514,8 @@
             </select>
           </label>
           <label>D-DH max<input id="d_dh" type="number" min="0" step="1" /></label>
+          <label>Rate min<input id="rate_min" type="number" min="0" step="1" /></label>
+          <label>Rate max<input id="rate_max" type="number" min="0" step="1" /></label>
           <label>Min match score
             <input id="min_score" type="number" min="0" step="0.1" value="0" />
           </label>
@@ -609,6 +611,16 @@
       return Math.max(0, parsed);
     }
 
+    function optionalRateInt(value) {
+      const text = String(value ?? "").trim();
+      if (!text) return null;
+      const cleaned = text.replace(/[$,]/g, "");
+      if (!cleaned) return null;
+      const parsed = parseInt(cleaned, 10);
+      if (!Number.isFinite(parsed)) return null;
+      return Math.max(0, parsed);
+    }
+
     function payloadFromForm() {
       const oDh = optionalInt(document.getElementById("o_dh").value);
       const dDh = optionalInt(document.getElementById("d_dh").value);
@@ -622,6 +634,8 @@
         "D-St": document.getElementById("d_st").value,
         "O-DH": oDh,
         "D-DH": dDh,
+        rate_min: optionalRateInt(document.getElementById("rate_min").value),
+        rate_max: optionalRateInt(document.getElementById("rate_max").value),
         limit: limit,
         only_unscored: document.getElementById("only_unscored").value === "true",
         replace: document.getElementById("replace").value === "true"
@@ -865,6 +879,8 @@
       document.getElementById("d_city").value = "";
       document.getElementById("d_st").value = "";
       document.getElementById("d_dh").value = "";
+      document.getElementById("rate_min").value = "";
+      document.getElementById("rate_max").value = "";
       document.getElementById("min_score").value = "0";
       document.getElementById("only_unscored").value = "false";
       document.getElementById("replace").value = "true";

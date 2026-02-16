@@ -124,6 +124,8 @@ class ShortlistRequest(BaseModel):
     d_st: Optional[str] = Field(default=None, alias="D-St")
     o_dh_max: Optional[int] = Field(default=None, alias="O-DH")
     d_dh_max: Optional[int] = Field(default=None, alias="D-DH")
+    rate_min: Optional[int] = None
+    rate_max: Optional[int] = None
     replace: Optional[bool] = None
     limit: Optional[int] = None
     only_unscored: Optional[bool] = None
@@ -142,6 +144,8 @@ class LoadsQueryRequest(BaseModel):
     d_st: Optional[str] = Field(default=None, alias="D-St")
     o_dh_max: Optional[int] = Field(default=None, alias="O-DH")
     d_dh_max: Optional[int] = Field(default=None, alias="D-DH")
+    rate_min: Optional[int] = None
+    rate_max: Optional[int] = None
     states: Optional[List[str]] = None
     only_unscored: Optional[bool] = None
     limit: Optional[int] = None
@@ -537,6 +541,8 @@ def run_shortlist(
     d_st: str = "",
     o_dh_max: Optional[int] = None,
     d_dh_max: Optional[int] = None,
+    rate_min: Optional[int] = None,
+    rate_max: Optional[int] = None,
     replace: bool = False,
     limit: int = 200,
     only_unscored: bool = False,
@@ -585,6 +591,16 @@ def run_shortlist(
     if d_dh_max is not None:
         where.append("\"D-DH\" <= ?")
         params.append(d_dh_max)
+
+    rate_expr = "CAST(REPLACE(REPLACE(\"Rate\", '$', ''), ',', '') AS INTEGER)"
+    if rate_min is not None or rate_max is not None:
+        where.append("NULLIF(TRIM(REPLACE(REPLACE(\"Rate\", '$', ''), ',', '')), '') IS NOT NULL")
+    if rate_min is not None:
+        where.append(f"{rate_expr} >= ?")
+        params.append(rate_min)
+    if rate_max is not None:
+        where.append(f"{rate_expr} <= ?")
+        params.append(rate_max)
 
     cols = {row[1] for row in cur.execute("PRAGMA table_info(loads)").fetchall()}
     if only_unscored and "match_score" in cols:
@@ -640,6 +656,8 @@ def query_loads(
     d_st: str = "",
     o_dh_max: Optional[int] = None,
     d_dh_max: Optional[int] = None,
+    rate_min: Optional[int] = None,
+    rate_max: Optional[int] = None,
     states: Optional[List[str]] = None,
     only_unscored: bool = False,
     limit: int = 200,
@@ -682,6 +700,16 @@ def query_loads(
     if d_dh_max is not None:
         where.append("\"D-DH\" <= ?")
         params.append(d_dh_max)
+
+    rate_expr = "CAST(REPLACE(REPLACE(\"Rate\", '$', ''), ',', '') AS INTEGER)"
+    if rate_min is not None or rate_max is not None:
+        where.append("NULLIF(TRIM(REPLACE(REPLACE(\"Rate\", '$', ''), ',', '')), '') IS NOT NULL")
+    if rate_min is not None:
+        where.append(f"{rate_expr} >= ?")
+        params.append(rate_min)
+    if rate_max is not None:
+        where.append(f"{rate_expr} <= ?")
+        params.append(rate_max)
 
     if states:
         placeholders = ",".join(["?"] * len(states))
@@ -831,6 +859,8 @@ def shortlist_endpoint(req: ShortlistRequest) -> dict:
         d_st=req.d_st if req.d_st is not None else "",
         o_dh_max=req.o_dh_max,
         d_dh_max=req.d_dh_max,
+        rate_min=req.rate_min,
+        rate_max=req.rate_max,
         replace=req.replace if req.replace is not None else False,
         limit=req.limit if req.limit is not None else 200,
         only_unscored=req.only_unscored if req.only_unscored is not None else False,
@@ -850,6 +880,8 @@ def loads_query_endpoint(req: LoadsQueryRequest) -> dict:
         d_st=req.d_st if req.d_st is not None else "",
         o_dh_max=req.o_dh_max,
         d_dh_max=req.d_dh_max,
+        rate_min=req.rate_min,
+        rate_max=req.rate_max,
         states=req.states,
         only_unscored=req.only_unscored if req.only_unscored is not None else False,
         limit=req.limit if req.limit is not None else 200,
