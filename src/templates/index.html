@@ -275,6 +275,17 @@
     button.button-dark:hover {
       box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
     }
+    .shutdown-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--ink);
+    }
     button:hover {
       transform: translateY(-1px);
       box-shadow: 0 8px 18px rgba(11, 94, 215, 0.18);
@@ -592,6 +603,7 @@
     let nextRefreshAt = null;
     let hasRunFilters = false;
     let isRunning = false;
+    let isShuttingDown = false;
     let clockTimer = null;
     let resyncTimer = null;
     let timeSeconds = null;
@@ -788,7 +800,7 @@
     }
 
     async function runFiltersAndLoad({ runScrape: shouldScrape = false } = {}) {
-      if (isRunning) return;
+      if (isRunning || isShuttingDown) return;
       const startMs = performance.now();
       isRunning = true;
       if (shouldScrape) {
@@ -849,6 +861,7 @@
     }
 
     document.getElementById("btn-scrape").addEventListener("click", async () => {
+      if (isShuttingDown) return;
       try {
         await runScrape();
       } catch (err) {
@@ -896,21 +909,27 @@
     }
 
     closeButton.addEventListener("click", async () => {
+      if (isShuttingDown) return;
+      isShuttingDown = true;
+      setBusyState(true);
       closeButton.disabled = true;
       statusQuit.textContent = "Shutting down...";
       statusReset.textContent = "";
       try {
         await postJson("/shutdown", {});
         setTimeout(() => {
-          statusQuit.textContent = "You can now close this tab.";
-        }, 400);
+          document.body.innerHTML = "<div class=\"shutdown-screen\">Application closed. You can now close this tab.</div>";
+        }, 250);
       } catch (err) {
-        statusQuit.textContent = "Shutdown failed.";
+        statusQuit.textContent = "Unable to close. Please try again.";
         closeButton.disabled = false;
+        setBusyState(false);
+        isShuttingDown = false;
       }
     });
 
     resetButton.addEventListener("click", () => {
+      if (isShuttingDown) return;
       resetAppState();
     });
 
