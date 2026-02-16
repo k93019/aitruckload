@@ -31,7 +31,7 @@ jobs:
       - name: Set app version
         shell: pwsh
         run: |
-          $version = "1.0.1"
+          $version = "1.0.5"
           if ($env:GITHUB_REF -like "refs/tags/v*") {
             $version = ($env:GITHUB_REF -replace "^refs/tags/v", "")
           }
@@ -45,7 +45,7 @@ jobs:
             --add-data "src\templates;src\templates" `
             --add-data "src\assets;src\assets" `
             --add-data "data;data" `
-            "src\main.py"
+            "launcher.pyw"
 
       - name: Install Inno Setup
         shell: pwsh
