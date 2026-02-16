@@ -44,13 +44,18 @@
       min-width: 240px;
       flex: 1;
       display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+    .header-logo {
+      display: flex;
       flex-direction: column;
-      gap: 8px;
+      align-items: center;
+      gap: 6px;
     }
     .title-row {
       display: flex;
       align-items: baseline;
-      gap: 16px;
       min-width: 0;
     }
     .title-row h1 {
@@ -58,15 +63,6 @@
       font-size: 32px;
       letter-spacing: 0.2px;
       white-space: nowrap;
-    }
-    .title-row .subtitle {
-      margin: 0 0 0 auto;
-      color: var(--muted);
-      font-size: 14px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 420px;
     }
     .header-actions {
       display: flex;
@@ -87,25 +83,14 @@
       margin-left: auto;
       display: flex;
       flex-direction: column;
-      align-items: flex-start;
-      gap: 12px;
-    }
-    .header-right-top {
-      display: flex;
-      align-items: flex-start;
-      gap: 16px;
-    }
-    .header-buttons {
-      display: flex;
-      flex-direction: column;
       align-items: flex-end;
       gap: 8px;
     }
-    .header-brand {
+    .header-buttons {
       display: flex;
-      flex-direction: column;
       align-items: center;
-      gap: 6px;
+      justify-content: flex-end;
+      gap: 10px;
     }
     .status-stack {
       display: flex;
@@ -117,7 +102,7 @@
     .time-stack {
       display: flex;
       flex-direction: column;
-      align-items: flex-end;
+      align-items: center;
       gap: 2px;
     }
     .time-display {
@@ -130,6 +115,16 @@
       font-size: 12px;
       color: #9b4a2f;
       white-space: nowrap;
+    }
+    .status-auto {
+      font-size: 13px;
+      min-height: 0;
+    }
+    .status-ok {
+      color: #2d7a2d;
+    }
+    .status-error {
+      color: #b42318;
     }
     .header-actions label {
       font-size: 13px;
@@ -146,8 +141,8 @@
       white-space: nowrap;
     }
     .brand-icon {
-      width: 90px;
-      height: 90px;
+      width: 78px;
+      height: 78px;
       border-radius: 6px;
       object-fit: contain;
     }
@@ -370,7 +365,7 @@
       .header-actions { justify-content: flex-start; }
       .header-actions .status { text-align: left; }
       .title-row { flex-wrap: wrap; }
-      .title-row .subtitle { margin-left: 0; max-width: 100%; }
+      .header-main { flex-wrap: wrap; }
       .controls { grid-template-columns: repeat(2, minmax(160px, 1fr)); }
     }
     @media (max-width: 640px) {
@@ -382,9 +377,15 @@
   <header>
     <div class="header-inner">
       <div class="header-main">
+        <div class="header-logo">
+          <img class="brand-icon" src="/favicon.ico" alt="Truck load finder" />
+          <div class="time-stack">
+            <div id="cst-time" class="time-display">CT --:--:--</div>
+            <div id="time-warning" class="time-warning"></div>
+          </div>
+        </div>
         <div class="title-row">
           <h1>Truck load finder</h1>
-          <p class="subtitle">Automatically retrieves data from the web and displays processed results</p>
         </div>
       </div>
       <div class="header-actions">
@@ -405,27 +406,19 @@
           </label>
           <button id="btn-scrape">Retrieve data</button>
           <div class="status-stack">
-            <div class="auto-refresh-status" id="auto-refresh-status"></div>
             <div class="status" id="status-scrape"></div>
             <div class="status" id="status-results"></div>
+            <div class="status status-auto" id="status-auto-error"></div>
+            <div class="auto-refresh-status" id="auto-refresh-status"></div>
           </div>
         </div>
         <div class="header-right">
-          <div class="header-right-top">
-            <div class="header-buttons">
-              <button id="btn-close" class="button-dark">Close App</button>
-              <button id="btn-reset" class="button-dark">Reset App</button>
-              <div class="status" id="status-quit"></div>
-              <div class="status" id="status-reset"></div>
-            </div>
-            <div class="header-brand">
-              <img class="brand-icon" src="/favicon.ico" alt="Truck load finder" />
-              <div class="time-stack">
-                <div id="cst-time" class="time-display">CT --:--:--</div>
-                <div id="time-warning" class="time-warning"></div>
-              </div>
-            </div>
+          <div class="header-buttons">
+            <button id="btn-reset" class="button-dark">Reset App</button>
+            <button id="btn-close" class="button-dark">Close App</button>
           </div>
+          <div class="status" id="status-quit"></div>
+          <div class="status" id="status-reset"></div>
         </div>
       </div>
     </div>
@@ -624,6 +617,7 @@
     const statusReset = document.getElementById("status-reset");
     const statusShortlist = document.getElementById("status-shortlist");
     const statusResults = document.getElementById("status-results");
+    const statusAutoError = document.getElementById("status-auto-error");
     const statusWorking = document.getElementById("status-working");
     const tableBody = document.querySelector("#results-table tbody");
     const autoRefreshStatus = document.getElementById("auto-refresh-status");
@@ -639,6 +633,7 @@
     let hasRunFilters = false;
     let isRunning = false;
     let isShuttingDown = false;
+    let lastAutoRefreshError = null;
     let clockTimer = null;
     let resyncTimer = null;
     let timeSeconds = null;
@@ -730,9 +725,26 @@
       const seconds = refreshIntervalSeconds();
       if (seconds <= 0) {
         autoRefreshStatus.textContent = "";
+        updateAutoRefreshError();
         return;
       }
       autoRefreshStatus.textContent = "";
+      updateAutoRefreshError();
+    }
+
+    function updateAutoRefreshError() {
+      const seconds = refreshIntervalSeconds();
+      if (seconds <= 0) {
+        statusAutoError.textContent = "";
+        statusAutoError.classList.remove("status-ok", "status-error");
+        return;
+      }
+      const hasError = Boolean(lastAutoRefreshError);
+      statusAutoError.textContent = hasError
+        ? `Error message: ${lastAutoRefreshError}`
+        : "Error message: None";
+      statusAutoError.classList.toggle("status-ok", !hasError);
+      statusAutoError.classList.toggle("status-error", hasError);
     }
 
     function updateCountdownLabel() {
@@ -759,6 +771,7 @@
       if (seconds <= 0) {
         clearCountdown();
         scrapeButton.textContent = scrapeButtonLabel;
+        updateAutoRefreshError();
         return;
       }
       if (!hasRunFilters) {
@@ -766,6 +779,7 @@
         return;
       }
       updateCountdownLabel();
+      updateAutoRefreshError();
     }
 
     function setAutoRefresh() {
@@ -837,6 +851,11 @@
     async function runFiltersAndLoad({ runScrape: shouldScrape = false } = {}) {
       if (isRunning || isShuttingDown) return;
       const startMs = performance.now();
+      const autoRefreshOn = refreshIntervalSeconds() > 0 && shouldScrape;
+      if (autoRefreshOn) {
+        lastAutoRefreshError = null;
+        updateAutoRefreshError();
+      }
       isRunning = true;
       if (shouldScrape) {
         document.body.classList.add("auto-refresh-active");
@@ -881,10 +900,18 @@
         statusResults.innerHTML = `<strong>Results:</strong> Showing ${rows.length} of ${result.count} results (min match score ${threshold}).`;
         sendTiming("filters_pipeline", Math.round(performance.now() - startMs));
         hasRunFilters = true;
+        if (autoRefreshOn) {
+          lastAutoRefreshError = null;
+          updateAutoRefreshError();
+        }
         setAutoRefresh();
         updateAutoRefreshControls();
       } catch (err) {
         statusShortlist.textContent = `Run filters failed: ${err.message}`;
+        if (autoRefreshOn) {
+          lastAutoRefreshError = "Load refresh failed";
+          updateAutoRefreshError();
+        }
       } finally {
         isRunning = false;
         setBusyState(false);
@@ -918,6 +945,8 @@
       isRunning = false;
       document.body.classList.remove("auto-refresh-active");
       document.getElementById("auto_refresh").value = "0";
+      lastAutoRefreshError = null;
+      updateAutoRefreshError();
       document.getElementById("tag").value = "";
       document.getElementById("date").selectedIndex = 0;
       document.getElementById("limit").value = "50";
@@ -935,6 +964,8 @@
       statusScrape.textContent = "";
       statusShortlist.textContent = "";
       statusResults.textContent = "";
+      statusAutoError.textContent = "";
+      statusAutoError.classList.remove("status-ok", "status-error");
       statusWorking.textContent = "";
       statusQuit.textContent = "";
       statusReset.textContent = "Reset complete.";
@@ -974,6 +1005,7 @@
 
     document.getElementById("auto_refresh").addEventListener("change", () => {
       setAutoRefresh();
+      updateAutoRefreshError();
     });
 
     function addDays(dateStr, days) {
@@ -1086,6 +1118,10 @@
       } catch (err) {
         if (timeWarning) {
           timeWarning.textContent = "Time sync failed — using local clock";
+        }
+        if (refreshIntervalSeconds() > 0 && !lastAutoRefreshError) {
+          lastAutoRefreshError = "Time sync unavailable";
+          updateAutoRefreshError();
         }
         const fallback = getChicagoPartsFromLocal(new Date());
         setTimeState(fallback.dateStr, fallback.timeStr, fallback.label);
