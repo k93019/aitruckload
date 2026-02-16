@@ -59,10 +59,22 @@
       flex-wrap: wrap;
     }
     .header-brand {
-      margin-left: auto;
       display: flex;
       align-items: center;
       gap: 12px;
+    }
+    .header-right {
+      margin-left: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 12px;
+    }
+    .header-buttons {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
     }
     .time-stack {
       display: flex;
@@ -255,6 +267,14 @@
       background: #e9eef8;
       color: #12325f;
     }
+    button.button-dark {
+      background: #0f0f10;
+      color: #ffffff;
+      border: 1px solid #0f0f10;
+    }
+    button.button-dark:hover {
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
+    }
     button:hover {
       transform: translateY(-1px);
       box-shadow: 0 8px 18px rgba(11, 94, 215, 0.18);
@@ -341,18 +361,24 @@
             </select>
           </label>
           <button id="btn-scrape">Retrieve data</button>
-          <button id="btn-quit" class="secondary">Close/Quit Application</button>
           <div class="auto-refresh-status" id="auto-refresh-status"></div>
           <div class="status" id="status-scrape"></div>
-          <div class="status" id="status-quit"></div>
           <div class="status" id="status-results"></div>
         </div>
-        <div class="header-brand">
-          <div class="time-stack">
-            <div id="cst-time" class="time-display">CT --:--:--</div>
-            <div id="time-warning" class="time-warning"></div>
+        <div class="header-right">
+          <div class="header-buttons">
+            <button id="btn-close" class="button-dark">Close App</button>
+            <button id="btn-reset" class="button-dark">Reset App</button>
+            <div class="status" id="status-quit"></div>
+            <div class="status" id="status-reset"></div>
           </div>
-          <img class="brand-icon" src="/favicon.ico" alt="Truck load finder" />
+          <div class="header-brand">
+            <div class="time-stack">
+              <div id="cst-time" class="time-display">CT --:--:--</div>
+              <div id="time-warning" class="time-warning"></div>
+            </div>
+            <img class="brand-icon" src="/favicon.ico" alt="Truck load finder" />
+          </div>
         </div>
       </div>
     </div>
@@ -547,13 +573,15 @@
   <script>
     const statusScrape = document.getElementById("status-scrape");
     const statusQuit = document.getElementById("status-quit");
+    const statusReset = document.getElementById("status-reset");
     const statusShortlist = document.getElementById("status-shortlist");
     const statusResults = document.getElementById("status-results");
     const statusWorking = document.getElementById("status-working");
     const tableBody = document.querySelector("#results-table tbody");
     const autoRefreshStatus = document.getElementById("auto-refresh-status");
     const scrapeButton = document.getElementById("btn-scrape");
-    const quitButton = document.getElementById("btn-quit");
+    const closeButton = document.getElementById("btn-close");
+    const resetButton = document.getElementById("btn-reset");
     const scrapeButtonLabel = scrapeButton.textContent;
     const timeDisplay = document.getElementById("cst-time");
     const timeWarning = document.getElementById("time-warning");
@@ -814,18 +842,60 @@
       }
     });
 
-    quitButton.addEventListener("click", async () => {
-      quitButton.disabled = true;
+    function resetAppState() {
+      if (refreshTimer) {
+        clearInterval(refreshTimer);
+        refreshTimer = null;
+      }
+      if (countdownTimer) {
+        clearInterval(countdownTimer);
+        countdownTimer = null;
+      }
+      nextRefreshAt = null;
+      hasRunFilters = false;
+      isRunning = false;
+      document.body.classList.remove("auto-refresh-active");
+      document.getElementById("auto_refresh").value = "0";
+      document.getElementById("tag").value = "";
+      document.getElementById("date").selectedIndex = 0;
+      document.getElementById("limit").value = "50";
+      document.getElementById("o_city").value = "";
+      document.getElementById("o_st").value = "";
+      document.getElementById("o_dh").value = "";
+      document.getElementById("d_city").value = "";
+      document.getElementById("d_st").value = "";
+      document.getElementById("d_dh").value = "";
+      document.getElementById("min_score").value = "0";
+      document.getElementById("only_unscored").value = "false";
+      document.getElementById("replace").value = "true";
+      statusScrape.textContent = "";
+      statusShortlist.textContent = "";
+      statusResults.textContent = "";
+      statusWorking.textContent = "";
+      statusQuit.textContent = "";
+      statusReset.textContent = "Reset complete.";
+      tableBody.innerHTML = "";
+      setBusyState(false);
+      updateAutoRefreshControls();
+    }
+
+    closeButton.addEventListener("click", async () => {
+      closeButton.disabled = true;
       statusQuit.textContent = "Shutting down...";
+      statusReset.textContent = "";
       try {
         await postJson("/shutdown", {});
         setTimeout(() => {
           statusQuit.textContent = "You can now close this tab.";
         }, 400);
       } catch (err) {
-        statusQuit.textContent = `Shutdown failed: ${err.message}`;
-        quitButton.disabled = false;
+        statusQuit.textContent = "Shutdown failed.";
+        closeButton.disabled = false;
       }
+    });
+
+    resetButton.addEventListener("click", () => {
+      resetAppState();
     });
 
     document.getElementById("btn-shortlist").addEventListener("click", async () => {
