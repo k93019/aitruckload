@@ -80,6 +80,7 @@ def main() -> None:
         "src.main:app",
         host=HOST,
         port=PORT,
+        log_config=None,
         log_level="warning",
     )
 
