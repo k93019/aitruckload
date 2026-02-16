@@ -3,12 +3,13 @@ import json
 import os
 import sqlite3
 import time
+import traceback
 from pathlib import Path
 from datetime import UTC, datetime, timezone
 from typing import Any, Dict, List, Optional
 
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse, HTMLResponse
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from pydantic import BaseModel, Field
 
 
@@ -40,6 +41,40 @@ def write_timing(entry: Dict[str, Any]) -> None:
     }
     with open(TIMING_LOG_PATH, "a", encoding="utf-8") as handle:
         handle.write(json.dumps(payload, separators=(",", ":")) + "\n")
+
+
+def server_error_log_path() -> Path:
+    db_path = os.getenv("LOADS_DB_PATH", DB_PATH)
+    try:
+        base_dir = Path(db_path).resolve().parent
+    except Exception:
+        base_dir = Path.cwd()
+    return base_dir / "error.log"
+
+
+def write_server_error(message: str) -> Path:
+    log_path = server_error_log_path()
+    try:
+        log_path.parent.mkdir(parents=True, exist_ok=True)
+    except Exception:
+        pass
+    with open(log_path, "a", encoding="utf-8") as handle:
+        handle.write(message)
+        if not message.endswith("\n"):
+            handle.write("\n")
+    return log_path
+
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+    if isinstance(exc, HTTPException):
+        return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+    trace = traceback.format_exc()
+    log_path = write_server_error(trace)
+    return JSONResponse(
+        status_code=500,
+        content={"detail": f"Internal server error. See log at {log_path}"},
+    )
 
 
 @app.get("/", response_class=HTMLResponse)
