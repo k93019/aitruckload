@@ -797,6 +797,15 @@ def health() -> dict:
     return {"status": "ok"}
 
 
+@app.post("/shutdown")
+def shutdown() -> dict:
+    cb = getattr(app.state, "shutdown_cb", None)
+    if callable(cb):
+        cb()
+        return {"status": "shutting_down"}
+    return {"status": "unavailable"}
+
+
 @app.post("/scrape")
 def scrape_endpoint(req: ScrapeRequest) -> dict:
     try:

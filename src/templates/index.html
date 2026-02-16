@@ -341,8 +341,10 @@
             </select>
           </label>
           <button id="btn-scrape">Retrieve data</button>
+          <button id="btn-quit" class="secondary">Close/Quit Application</button>
           <div class="auto-refresh-status" id="auto-refresh-status"></div>
           <div class="status" id="status-scrape"></div>
+          <div class="status" id="status-quit"></div>
           <div class="status" id="status-results"></div>
         </div>
         <div class="header-brand">
@@ -544,12 +546,14 @@
 
   <script>
     const statusScrape = document.getElementById("status-scrape");
+    const statusQuit = document.getElementById("status-quit");
     const statusShortlist = document.getElementById("status-shortlist");
     const statusResults = document.getElementById("status-results");
     const statusWorking = document.getElementById("status-working");
     const tableBody = document.querySelector("#results-table tbody");
     const autoRefreshStatus = document.getElementById("auto-refresh-status");
     const scrapeButton = document.getElementById("btn-scrape");
+    const quitButton = document.getElementById("btn-quit");
     const scrapeButtonLabel = scrapeButton.textContent;
     const timeDisplay = document.getElementById("cst-time");
     const timeWarning = document.getElementById("time-warning");
@@ -807,6 +811,20 @@
         await runScrape();
       } catch (err) {
         statusScrape.textContent = `Scrape failed: ${err.message}`;
+      }
+    });
+
+    quitButton.addEventListener("click", async () => {
+      quitButton.disabled = true;
+      statusQuit.textContent = "Shutting down...";
+      try {
+        await postJson("/shutdown", {});
+        setTimeout(() => {
+          statusQuit.textContent = "You can now close this tab.";
+        }, 400);
+      } catch (err) {
+        statusQuit.textContent = `Shutdown failed: ${err.message}`;
+        quitButton.disabled = false;
       }
     });
 

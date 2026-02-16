@@ -103,13 +103,16 @@ def main() -> None:
         )
         browser_thread.start()
 
-        uvicorn.run(
+        config = uvicorn.Config(
             app,
             host=HOST,
             port=PORT,
             log_config=None,
             log_level="warning",
         )
+        server = uvicorn.Server(config)
+        app.state.shutdown_cb = lambda: setattr(server, "should_exit", True)
+        server.run()
     except Exception:
         trace = traceback.format_exc()
         log_path = write_error_log(trace)
