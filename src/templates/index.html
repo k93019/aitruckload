@@ -822,7 +822,7 @@
       statusScrape.textContent = "Running scrape...";
       const overwrite = document.getElementById("overwrite").value === "true";
       const result = await postJson("/scrape", { overwrite });
-      statusScrape.textContent = `Retrieved ${result.total_returned} loads. Inserted ${result.inserted}, updated ${result.updated}. Total Loads: ${result.total_in_db}`;
+      statusScrape.innerHTML = `<strong>Raw Retrieval:</strong> Retrieved ${result.total_returned} loads. Inserted ${result.inserted}, updated ${result.updated}. Total Loads: ${result.total_in_db}`;
       return result;
     }
 
@@ -897,7 +897,7 @@
         const rows = sorted.filter(r => r.match_score != null && r.match_score >= threshold);
         renderTable(rows);
         statusShortlist.textContent = `Tagged ${shortlistResult.marked}. Total tagged: ${shortlistResult.total}. Scored ${scoreResult.scored}.`;
-        statusResults.innerHTML = `<strong>Results:</strong> Showing ${rows.length} of ${result.count} results (min match score ${threshold}).`;
+        statusResults.innerHTML = `<strong>Filtered Results:</strong> Showing ${rows.length} of ${result.count} results (min match score ${threshold}).`;
         sendTiming("filters_pipeline", Math.round(performance.now() - startMs));
         hasRunFilters = true;
         if (autoRefreshOn) {
